@@ -1,35 +1,43 @@
-
-import streamlit as st
+import os
 import pandas as pd
+import streamlit as st
+import matplotlib.pyplot as plt
 
-RAW_BASE = "https://raw.githubusercontent.com/la3ll/pcvaluecheck/main/pc_value_app/data/"
+# --- Paths ---
+BASE_DIR = os.path.join(os.path.dirname(__file__), "data")
+CPUS_CSV = os.path.join(BASE_DIR, "cpus.csv")
+GPUS_CSV = os.path.join(BASE_DIR, "gpus.csv")
+PARTS_CSV = os.path.join(BASE_DIR, "parts_meta.csv")
 
-st.title("💻 PC Value Checker")
-st.write("Compare PC build performance, see which games it can run, and find value scores.")
+# --- Load data ---
+cpus = pd.read_csv(CPUS_CSV)
+gpus = pd.read_csv(GPUS_CSV)
+parts_meta = pd.read_csv(PARTS_CSV)
 
-# Load CSVs from GitHub
-cpus = pd.read_csv(RAW_BASE + "cpus.csv")
-gpus = pd.read_csv(RAW_BASE + "gpus.csv")
-parts_meta = pd.read_csv(RAW_BASE + "parts_meta.csv")
+# --- Streamlit App ---
+st.title("PC Value Checker")
 
-st.header("Available CPUs")
-st.dataframe(cpus)
+st.write("This app helps you evaluate PC builds, estimate gaming performance, and score value.")
 
-st.header("Available GPUs")
-st.dataframe(gpus)
+# Example: Select CPU
+cpu_choice = st.selectbox("Select CPU", cpus["name"].tolist())
+gpu_choice = st.selectbox("Select GPU", gpus["name"].tolist())
 
-st.header("Other Parts")
-st.dataframe(parts_meta)
+cpu_score = cpus.loc[cpus["name"] == cpu_choice, "score"].values[0]
+gpu_score = gpus.loc[gpus["name"] == gpu_choice, "score"].values[0]
 
-# Simple value score calculation
-st.header("💡 Value Score Calculator")
-selected_cpu = st.selectbox("Choose CPU", cpus["name"])
-selected_gpu = st.selectbox("Choose GPU", gpus["name"])
+st.write(f"CPU Score: {cpu_score}")
+st.write(f"GPU Score: {gpu_score}")
 
-cpu_price = cpus.loc[cpus["name"] == selected_cpu, "price"].values[0]
-gpu_price = gpus.loc[gpus["name"] == selected_gpu, "price"].values[0]
-cpu_score = cpus.loc[cpus["name"] == selected_cpu, "score"].values[0]
-gpu_score = gpus.loc[gpus["name"] == selected_gpu, "fps_1080p"].values[0]
+# Example value score calculation
+total_score = cpu_score + gpu_score
+price = cpus.loc[cpus["name"] == cpu_choice, "price"].values[0] + gpus.loc[gpus["name"] == gpu_choice, "price"].values[0]
+value_score = min(int(total_score / price * 1000), 100)
 
-value_score = round(((cpu_score / cpu_price) + (gpu_score / gpu_price)) * 10, 2)
-st.metric("Total Value Score", value_score, "/100")
+st.write(f"Estimated Value Score: {value_score}/100")
+
+# Optional: Plot scores
+fig, ax = plt.subplots()
+ax.bar(["CPU", "GPU"], [cpu_score, gpu_score])
+ax.set_ylabel("Performance Score")
+st.pyplot(fig)
