@@ -1,7 +1,0 @@
-name,score,price,platform,socket,notes
-AMD Ryzen 5 5600,20500,115,AM4,AM4,Great budget; older platform
-AMD Ryzen 5 7600,27000,200,AM5,AM5,"Modern platform, DDR5"
-AMD Ryzen 7 7800X3D,39500,370,AM5,AM5,Top-tier gaming CPU
-Intel Core i5-12400F,22000,135,LGA1700,LGA1700,Strong budget Intel
-Intel Core i5-13600K,31500,300,LGA1700,LGA1700,Great mid-high CPU
-Intel Core i7-13700K,37000,400,LGA1700,LGA1700,High-end Intel option
