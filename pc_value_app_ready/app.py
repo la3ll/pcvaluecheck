@@ -12,7 +12,6 @@ PARTS_CSV = os.path.join(BASE_DIR, "parts_meta.csv")
 # --- Load data ---
 cpus = pd.read_csv(CPUS_CSV)
 gpus = pd.read_csv(GPUS_CSV)
-parts_meta = pd.read_csv(PARTS_CSV)
 
 # --- Streamlit App ---
 st.title("PC Value Checker")
