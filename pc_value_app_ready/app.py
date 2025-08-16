@@ -135,10 +135,10 @@ def score(gpu_fps, cpu_passmark):
     return round(gpu_norm*0.7 + cpu_norm*0.3, 1)
 
 game_requirements = {
-    "Elden Ring":         {"ultra": 85, "high": 70, "medium": 45},
-    "Cyberpunk 2077":     {"ultra": 90, "high": 75, "medium": 55},
-    "Baldur's Gate 3":    {"ultra": 80, "high": 65, "medium": 50},
-   "Fortnite":            {"ultra": 55, "high": 45, "medium": 30},
+    "Elden Ring":       {"ultra": 70, "high": 55, "medium": 45},
+    "Cyberpunk 2077":   {"ultra": 75, "high": 60, "medium": 55},
+    "Baldur's Gate 3":  {"ultra": 65, "high": 50, "medium": 50},
+    "Fortnite":            {"ultra": 55, "high": 45, "medium": 30},
     "Valorant":           {"ultra": 50, "high": 35, "medium": 20},
     "Minecraft (Java)":   {"ultra": 30, "high": 20, "medium": 10},
     "The Sims 4":         {"ultra": 40, "high": 25, "medium": 15},
