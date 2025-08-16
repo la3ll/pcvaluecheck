@@ -138,7 +138,7 @@ game_requirements = {
     "Elden Ring":       {"ultra": 65, "high": 55, "medium": 40},
     "Cyberpunk 2077":   {"ultra": 80, "high": 60, "medium": 55},
     "Baldur's Gate 3":  {"ultra": 65, "high": 50, "medium": 40},
-    "Fortnite":            {"ultra": 55, "high": 45, "medium": 30},
+    "Fortnite":            {"ultra": 50, "high": 35, "medium": 20},
     "Valorant":           {"ultra": 50, "high": 35, "medium": 20},
     "Minecraft (Java)":   {"ultra": 30, "high": 20, "medium": 10},
     "The Sims 4":         {"ultra": 40, "high": 25, "medium": 15},
