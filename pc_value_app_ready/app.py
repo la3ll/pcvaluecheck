@@ -143,60 +143,52 @@ game_requirements = {
     "Minecraft (Java)":   {"ultra": 30, "high": 20, "medium": 10},
     "The Sims 4":         {"ultra": 40, "high": 25, "medium": 15},
     "CS2 / CS:GO":        {"ultra": 45, "high": 30, "medium": 20},
-    "GTA V":             {"ultra": 60, "high": 45, "medium": 30},
-    "League of Legends": {"ultra": 35, "high": 20, "medium": 10}
+    "GTA V":              {"ultra": 60, "high": 45, "medium": 30},
+    "League of Legends":  {"ultra": 35, "high": 20, "medium": 10}
 }
 
 def colour_setting(game, total_score):
     thr = game_requirements[game]
-    if total_score >= thr["ultra"]: return "green"
-    if total_score >= thr["high"]: return "yellow"
-    if total_score >= thr["medium"]: return "orange"
-    return "red"
+    if total_score >= thr["ultra"]:
+        return "<span style='color:#007f00;font-weight:bold'>Ultra</span>"  # deep green
+    elif total_score >= thr["high"]:
+        return "<span style='color:#e8a400;font-weight:bold'>High</span>"    # amber
+    elif total_score >= thr["medium"]:
+        return "<span style='color:#0074cc;font-weight:bold'>Medium</span>"  # blue
+    else:
+        return "<span style='color:#808080;font-weight:bold'>Low</span>"     # grey
 
 # -----------------------------
-# Streamlit UI
+# UI
 # -----------------------------
-st.title("CPU-GPU Performance Checker")
+st.title("PC Gaming Build Predictor")
 
-selected_gpu_name = st.selectbox("Select GPU", gpus["name"])
-selected_cpu_name = st.selectbox("Select CPU", cpus["name"])
+gpu_choice = st.selectbox("Select GPU", gpus["name"])
+cpu_choice = st.selectbox("Select CPU", cpus["name"])
 
-selected_gpu = gpus[gpus["name"] == selected_gpu_name].iloc[0]
-selected_cpu = cpus[cpus["name"] == selected_cpu_name].iloc[0]
+gpu_fps = gpus.loc[gpus["name"]==gpu_choice, "avg_fps"].values[0]
+cpu_score = cpus.loc[cpus["name"]==cpu_choice, "passmark_score"].values[0]
 
-total_score = score(selected_gpu["avg_fps"], selected_cpu["passmark_score"])
-st.write(f"Overall performance score: {total_score}")
+total_score = score(gpu_fps, cpu_score)
 
-# -----------------------------
-# Game recommendations
-# -----------------------------
 st.subheader("Game Recommendations")
 for game in game_requirements:
-    st.markdown(f"- <span style='color:{colour_setting(game, total_score)}'>{game}</span>", unsafe_allow_html=True)
+    colour = colour_setting(game, total_score)
+    if "Low" in colour:  # warning for low
+        st.markdown(f"- ⚠️ {game}: {colour}", unsafe_allow_html=True)
+    else:
+        st.markdown(f"- {game}: {colour}", unsafe_allow_html=True)
 
 # -----------------------------
-# Mismatch logic
+# Upgrade Suggestions
 # -----------------------------
-gpu_norm = selected_gpu["avg_fps"] / 200
-cpu_norm = selected_cpu["passmark_score"] / 70000
-ratio = gpu_norm / cpu_norm
-
-if ratio > 2 or ratio < 0.5:
-    st.warning("⚠️ Your CPU and GPU are mismatched in performance.")
-
-    st.subheader("Upgrade Suggestions:")
-
-    if ratio > 2:  # GPU >> CPU
-        possible_cpus = cpus[cpus["passmark_score"] > selected_cpu["passmark_score"]].copy()
-        possible_cpus["score_diff"] = abs(possible_cpus["passmark_score"]/70000 - gpu_norm)
-        top_cpus = possible_cpus.sort_values(by="score_diff").head(3)
-        for i, cpu in enumerate(top_cpus["name"], start=1):
-            st.write(f"{i}. Upgrade CPU to: {cpu}")
-
-    if ratio < 0.5:  # CPU >> GPU
-        possible_gpus = gpus[gpus["avg_fps"] > selected_gpu["avg_fps"]].copy()
-        possible_gpus["score_diff"] = abs(possible_gpus["avg_fps"]/200 - cpu_norm)
-        top_gpus = possible_gpus.sort_values(by="score_diff").head(3)
-        for i, gpu in enumerate(top_gpus["name"], start=1):
-            st.write(f"{i}. Upgrade GPU to: {gpu}")
+st.subheader("Upgrade Suggestions")
+if total_score < 80:
+    # find GPU upgrades within 20% higher FPS
+    suggested_gpus = gpus[gpus["avg_fps"] > gpu_fps].sort_values("avg_fps", ascending=True).head(3)
+    for _, row in suggested_gpus.iterrows():
+        st.markdown(f"- GPU: {row['name']} (avg FPS: {row['avg_fps']})")
+    # find CPU upgrades within 20% higher Passmark
+    suggested_cpus = cpus[cpus["passmark_score"] > cpu_score].sort_values("passmark_score", ascending=True).head(3)
+    for _, row in suggested_cpus.iterrows():
+        st.markdown(f"- CPU: {row['name']} (Passmark: {row['passmark_score']})")
