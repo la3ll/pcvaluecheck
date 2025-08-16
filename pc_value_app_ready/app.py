@@ -175,3 +175,33 @@ st.subheader(f"Combined Gaming Score: {total} / 100")
 st.markdown("### 📊 **Predicted Settings**")
 for game in game_requirements:
     st.markdown(f"- **{game}**: {colour_setting(game, total)}", unsafe_allow_html=True)
+
+# Decide tiers out of 5
+def cpu_tier(passmark):
+    if passmark > 40000: return 5
+    if passmark > 25000: return 4
+    if passmark > 15000: return 3
+    if passmark > 8000:  return 2
+    return 1
+
+def gpu_tier(fps):
+    if fps > 175: return 5
+    if fps > 125: return 4
+    if fps > 75:  return 3
+    if fps > 45:  return 2
+    return 1
+
+ct = cpu_tier(cpu_score)
+gt = gpu_tier(gpu_fps)
+
+if abs(ct - gt) > 2:
+    st.warning("⚠️ Your CPU and GPU are mismatched in power. This can bottleneck performance.")
+    
+    if ct > gt:
+        # Suggest stronger GPU
+        better_gpu = gpus[gpus['avg_fps'] > gpu_fps].head(1)['name'].values[0]
+        st.write(f"Consider matching with a stronger GPU such as **{better_gpu}**")
+    else:
+        # Suggest weaker GPU
+        weaker_gpu = gpus[gpus['avg_fps'] < gpu_fps].tail(1)['name'].values[0]
+        st.write(f"Consider matching with a more realistic GPU such as **{weaker_gpu}**")
