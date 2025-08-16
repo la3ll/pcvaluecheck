@@ -168,37 +168,31 @@ for game in game_requirements:
         st.markdown(f"- <span style='color:{col}'>{game}</span>", unsafe_allow_html=True)
 
 # -----------------------------
-# Ratio-based mismatch check + suggestions
+# Ratio-based mismatch check
 # -----------------------------
 gpu_norm = gpu_fps / 200
 cpu_norm = cpu_score / 60000
 ratio = gpu_norm / cpu_norm
 
 if ratio > 1.4 or ratio < 0.6:
-    st.warning("⚠️ Your CPU and GPU appear to be unbalanced in performance (possible bottleneck).")
+    st.warning("⚠️ Your CPU and GPU are not aligned in performance (possible bottleneck).")
     
-    # Use tiers to pick suitable suggestions
-    def cpu_tier(passmark):
-        if passmark > 45000: return 5
-        if passmark > 30000: return 4
-        if passmark > 20000: return 3
-        if passmark > 12000: return 2
-        return 1
-
-    def gpu_tier(fps):
-        if fps > 180: return 5
-        if fps > 130: return 4
-        if fps > 90:  return 3
-        if fps > 60:  return 2
-        return 1
-
-    if ratio > 1:  # GPU stronger
-        st.write("Your GPU seems significantly stronger than your CPU. Consider a CPU upgrade:")
-        better_cpus = cpus[cpus['passmark_score'] > cpu_score].sort_values('passmark_score').head(3)
-        for name in better_cpus['name']:
-            st.markdown(f"- **{name}**")
-    else:          # CPU stronger
-        st.write("Your CPU seems significantly stronger than your GPU. Consider a GPU upgrade:")
-        better_gpus = gpus[gpus['avg_fps'] > gpu_fps].sort_values('avg_fps').head(3)
-        for name in better_gpus['name']:
-            st.markdown(f"- **{name}**")
+    if ratio > 1:  # GPU is stronger → find CPUs that match gpu_norm
+        target = gpu_norm * 60000  # convert back to passmark
+        candidates = cpus.copy()
+        candidates["diff"] = (candidates["passmark_score"] - target).abs()
+        suggested = candidates.sort_values("diff").head(3)
+        
+        st.write("Try matching your GPU with one of these CPUs:")
+        for _, row in suggested.iterrows():
+            st.markdown(f"- **{row['name']}** (Passmark: {row['passmark_score']})")
+            
+    else:         # CPU is stronger → find GPUs that match cpu_norm
+        target = cpu_norm * 200    # convert back to avg_fps
+        candidates = gpus.copy()
+        candidates["diff"] = (candidates["avg_fps"] - target).abs()
+        suggested = candidates.sort_values("diff").head(3)
+        
+        st.write("Try matching your CPU with one of these GPUs:")
+        for _, row in suggested.iterrows():
+            st.markdown(f"- **{row['name']}** (avg FPS: {row['avg_fps']})")
