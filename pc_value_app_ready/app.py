@@ -143,7 +143,7 @@ game_requirements = {
     "Minecraft (Java)":   {"ultra": 30, "high": 20, "medium": 10},
     "The Sims 4":         {"ultra": 40, "high": 25, "medium": 15},
     "CS2 / CS:GO":        {"ultra": 45, "high": 30, "medium": 20},
-    "GTA V":              {"ultra": 70, "high": 45, "medium": 30},
+    "GTA V":              {"ultra": 65, "high": 45, "medium": 30},
     "League of Legends":  {"ultra": 35, "high": 20, "medium": 10}
 }
 
