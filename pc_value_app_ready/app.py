@@ -127,39 +127,30 @@ gpus = pd.DataFrame(gpu_data, columns=["name", "avg_fps", "low_1_percent"])
 cpus = pd.DataFrame(cpu_data, columns=["name", "passmark_score"])
 
 # -----------------------------
-# Combine
+# Game requirement thresholds
 # -----------------------------
-def score(gpu_fps, cpu_passmark):
-    gpu_norm = min(gpu_fps/200*100, 100)
-    cpu_norm = min(cpu_passmark/60000*100, 100)
-    return round(gpu_norm*0.7 + cpu_norm*0.3, 1)
-
 game_requirements = {
-    "Elden Ring":       {"ultra": 65, "high": 55, "medium": 40},
-    "Cyberpunk 2077":   {"ultra": 80, "high": 60, "medium": 55},
-    "Baldur's Gate 3":  {"ultra": 65, "high": 50, "medium": 40},
-    "Fortnite":            {"ultra": 50, "high": 35, "medium": 20},
+    "Elden Ring":         {"ultra": 70, "high": 55, "medium": 45},
+    "Cyberpunk 2077":     {"ultra": 75, "high": 60, "medium": 55},
+    "Baldur's Gate 3":    {"ultra": 65, "high": 50, "medium": 50},
+    "Fortnite":           {"ultra": 55, "high": 45, "medium": 30},
     "Valorant":           {"ultra": 50, "high": 35, "medium": 20},
     "Minecraft (Java)":   {"ultra": 30, "high": 20, "medium": 10},
     "The Sims 4":         {"ultra": 40, "high": 25, "medium": 15},
     "CS2 / CS:GO":        {"ultra": 45, "high": 30, "medium": 20},
-    "GTA V":              {"ultra": 65, "high": 45, "medium": 30},
+    "GTA V":              {"ultra": 60, "high": 45, "medium": 30},
     "League of Legends":  {"ultra": 35, "high": 20, "medium": 10}
 }
 
-def colour_setting(game, total_score):
+def colour_setting(game, gpu_score):
     thr = game_requirements[game]
-    if total_score >= thr["ultra"]:
-        return "<span style='color:#007f00;font-weight:bold'>Ultra</span>"  # deep green
-    elif total_score >= thr["high"]:
-        return "<span style='color:#e8a400;font-weight:bold'>High</span>"    # amber
-    elif total_score >= thr["medium"]:
-        return "<span style='color:#0074cc;font-weight:bold'>Medium</span>"  # blue
-    else:
-        return "<span style='color:#808080;font-weight:bold'>Low</span>"     # grey
+    if gpu_score >= thr["ultra"]: return "green"
+    if gpu_score >= thr["high"]:  return "yellow"
+    if gpu_score >= thr["medium"]:return "orange"
+    return "red"
 
 # -----------------------------
-# UI
+# Streamlit UI
 # -----------------------------
 st.title("PC Gaming Build Predictor")
 
@@ -169,26 +160,49 @@ cpu_choice = st.selectbox("Select CPU", cpus["name"])
 gpu_fps = gpus.loc[gpus["name"]==gpu_choice, "avg_fps"].values[0]
 cpu_score = cpus.loc[cpus["name"]==cpu_choice, "passmark_score"].values[0]
 
-total_score = score(gpu_fps, cpu_score)
-
-st.subheader("Game Recommendations")
+# -----------------------------
+# Game colour recommendations
+# -----------------------------
+st.subheader("Game Recommendations:")
 for game in game_requirements:
-    colour = colour_setting(game, total_score)
-    if "Low" in colour:  # warning for low
-        st.markdown(f"- ⚠️ {game}: {colour}", unsafe_allow_html=True)
+    col = colour_setting(game, gpu_fps)
+    if col == "red":
+        st.markdown(f"- ⚠️ <span style='color:{col}'>{game}</span>", unsafe_allow_html=True)
     else:
-        st.markdown(f"- {game}: {colour}", unsafe_allow_html=True)
+        st.markdown(f"- <span style='color:{col}'>{game}</span>", unsafe_allow_html=True)
 
 # -----------------------------
-# Upgrade Suggestions
+# Ratio-based mismatch check + suggestions
 # -----------------------------
-st.subheader("Upgrade Suggestions")
-if total_score < 80:
-    # find GPU upgrades within 20% higher FPS
-    suggested_gpus = gpus[gpus["avg_fps"] > gpu_fps].sort_values("avg_fps", ascending=True).head(3)
-    for _, row in suggested_gpus.iterrows():
-        st.markdown(f"- GPU: {row['name']} (avg FPS: {row['avg_fps']})")
-    # find CPU upgrades within 20% higher Passmark
-    suggested_cpus = cpus[cpus["passmark_score"] > cpu_score].sort_values("passmark_score", ascending=True).head(3)
-    for _, row in suggested_cpus.iterrows():
-        st.markdown(f"- CPU: {row['name']} (Passmark: {row['passmark_score']})")
+gpu_norm = gpu_fps / 200
+cpu_norm = cpu_score / 60000
+ratio = gpu_norm / cpu_norm
+
+if ratio > 1.4 or ratio < 0.6:
+    st.warning("⚠️ Your CPU and GPU appear to be unbalanced in performance (possible bottleneck).")
+    
+    # Use tiers to pick suitable suggestions
+    def cpu_tier(passmark):
+        if passmark > 45000: return 5
+        if passmark > 30000: return 4
+        if passmark > 20000: return 3
+        if passmark > 12000: return 2
+        return 1
+
+    def gpu_tier(fps):
+        if fps > 180: return 5
+        if fps > 130: return 4
+        if fps > 90:  return 3
+        if fps > 60:  return 2
+        return 1
+
+    if ratio > 1:  # GPU stronger
+        st.write("Your GPU seems significantly stronger than your CPU. Consider a CPU upgrade:")
+        better_cpus = cpus[cpus['passmark_score'] > cpu_score].sort_values('passmark_score').head(3)
+        for name in better_cpus['name']:
+            st.markdown(f"- **{name}**")
+    else:          # CPU stronger
+        st.write("Your CPU seems significantly stronger than your GPU. Consider a GPU upgrade:")
+        better_gpus = gpus[gpus['avg_fps'] > gpu_fps].sort_values('avg_fps').head(3)
+        for name in better_gpus['name']:
+            st.markdown(f"- **{name}**")
