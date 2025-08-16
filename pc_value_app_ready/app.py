@@ -143,73 +143,69 @@ game_requirements = {
     "Minecraft (Java)":   {"ultra": 30, "high": 20, "medium": 10},
     "The Sims 4":         {"ultra": 40, "high": 25, "medium": 15},
     "CS2 / CS:GO":        {"ultra": 45, "high": 30, "medium": 20},
-    "GTA V":             {"ultra": 60, "high": 45, "medium": 30},
-    "League of Legends": {"ultra": 35, "high": 20, "medium": 10}
+    "GTA V":              {"ultra": 60, "high": 45, "medium": 30},
+    "League of Legends":  {"ultra": 35, "high": 20, "medium": 10}
 }
 
 def colour_setting(game, total_score):
     thr = game_requirements[game]
     if total_score >= thr["ultra"]:
-        return "<span style='color:#007f00;font-weight:bold'>Ultra</span>"
+        return "<span style='color:#007f00;font-weight:bold'>Ultra</span>"  # deep green
     elif total_score >= thr["high"]:
-        return "<span style='color:#e8a400;font-weight:bold'>High</span>"
+        return "<span style='color:#e8a600;font-weight:bold'>High</span>"   # orange
     elif total_score >= thr["medium"]:
-        return "<span style='color:#0074cc;font-weight:bold'>Medium</span>"
+        return "<span style='color:#ff0000;font-weight:bold'>Medium</span>" # red
     else:
-        return "<span style='color:#808080;font-weight:bold'>Low</span>"
+        return "<span style='color:#000000;font-weight:bold'>Low</span>"
 
 # -----------------------------
-# UI
+# Streamlit UI
 # -----------------------------
-st.title("PC Gaming Build Predictor")
+st.title("🎮 PC Bottleneck Checker & Upgrade Advisor")
 
-gpu_choice = st.selectbox("Select GPU", gpus["name"])
-cpu_choice = st.selectbox("Select CPU", cpus["name"])
+cpu_choice = st.selectbox("Select your CPU", cpus["name"])
+gpu_choice = st.selectbox("Select your GPU", gpus["name"])
 
-gpu_fps = gpus[gpus["name"] == gpu_choice]["avg_fps"].iloc[0]
-cpu_score = cpus[cpus["name"] == cpu_choice]["passmark_score"].iloc[0]
+cpu_score = int(cpus.loc[cpus['name'] == cpu_choice, 'passmark_score'])
+gpu_fps   = float(gpus.loc[gpus['name'] == gpu_choice, 'avg_fps'])
 
-total = score(gpu_fps, cpu_score)
-st.subheader(f"Combined Gaming Score: {total} / 100")
+total_score = score(gpu_fps, cpu_score)
+st.write(f"Your system score: **{total_score}**")
 
-st.markdown("### 📊 **Predicted Settings**")
-for game in game_requirements:
-    st.markdown(f"- **{game}**: {colour_setting(game, total)}", unsafe_allow_html=True)
+st.markdown("### Game Settings Prediction")
+for game in game_requirements.keys():
+    st.markdown(f"{game}: {colour_setting(game, total_score)}", unsafe_allow_html=True)
 
 # -----------------------------
-# CPU/GPU Tier & Mismatch
+# Bottleneck detection & upgrade suggestions
 # -----------------------------
 def cpu_tier(passmark):
-    if passmark > 40000: return "Enthusiast"
-    if passmark > 25000: return "High-end"
-    if passmark > 15000: return "Mid-range"
-    return "Entry"
+    if passmark > 40000: return 5
+    if passmark > 25000: return 4
+    if passmark > 15000: return 3
+    if passmark > 8000:  return 2
+    return 1
 
 def gpu_tier(fps):
-    if fps > 150: return "Enthusiast"
-    if fps > 100: return "High-end"
-    if fps > 60: return "Mid-range"
-    return "Entry"
+    if fps > 175: return 5
+    if fps > 125: return 4
+    if fps > 75:  return 3
+    if fps > 45:  return 2
+    return 1
 
-st.markdown(f"**CPU Tier:** {cpu_tier(cpu_score)}")
-st.markdown(f"**GPU Tier:** {gpu_tier(gpu_fps)}")
+ct = cpu_tier(cpu_score)
+gt = gpu_tier(gpu_fps)
 
-# -----------------------------
-# CPU/GPU Upgrade Advice (Top 3)
-# -----------------------------
-# GPU stronger than CPU
-if gpu_fps > cpu_score/600:
-    better_cpus = cpus[cpus['passmark_score'] > cpu_score].sort_values(by='passmark_score', ascending=False)
-    top_cpus = better_cpus.head(3)['name'].tolist()
-    if top_cpus:
-        st.info(f"🛠️ Your GPU is stronger than your CPU. Consider upgrading CPU to one of these: **{', '.join(top_cpus)}**")
+if abs(ct - gt) > 2:
+    st.warning("⚠️ Your CPU and GPU are mismatched in power. This can bottleneck performance.")
+
+    if ct > gt:
+        better_gpus = gpus[gpus['avg_fps'] > gpu_fps].sort_values('avg_fps')['name'].tolist()
+        if better_gpus:
+            suggestions = better_gpus[:3]
+            st.write(f"Consider upgrading your GPU to match your CPU, e.g.: **{', '.join(suggestions)}**")
     else:
-        st.info("✅ Your CPU is already very strong.")
-# CPU stronger than GPU
-if cpu_score/600 > gpu_fps:
-    better_gpus = gpus[gpus['avg_fps'] > gpu_fps].sort_values(by='avg_fps', ascending=False)
-    top_gpus = better_gpus.head(3)['name'].tolist()
-    if top_gpus:
-        st.info(f"⚡ Your CPU is stronger than your GPU. Consider upgrading GPU to one of these: **{', '.join(top_gpus)}**")
-    else:
-        st.info("✅ You already have one of the strongest GPUs.")
+        better_cpus = cpus[cpus['passmark_score'] > cpu_score].sort_values('passmark_score')['name'].tolist()
+        if better_cpus:
+            suggestions = better_cpus[:3]
+            st.write(f"Consider upgrading your CPU to match your GPU, e.g.: **{', '.join(suggestions)}**")
