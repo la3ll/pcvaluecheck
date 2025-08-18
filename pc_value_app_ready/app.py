@@ -162,8 +162,7 @@ gpu_fig = px.scatter(
     title='GPU Performance (FPS)'
 )
 gpu_fig.update_layout(
-    height=1200,  # height of graph
-    width=1200, # width of graph
+    height=1200,  # increased spacing between lines
     showlegend=False,
     xaxis_title="Average FPS",
     yaxis_title=""
@@ -185,8 +184,7 @@ cpu_fig = px.scatter(
     title='CPU Performance (PassMark)'
 )
 cpu_fig.update_layout(
-    height=1200,  # height of graph
-    width=1200, # width of graph
+    height=1200,  # increased spacing
     showlegend=False,
     xaxis_title="PassMark Score",
     yaxis_title=""
