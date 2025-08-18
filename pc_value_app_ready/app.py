@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # -----------------------------
 # GPU data (FPS-based strength)
@@ -120,7 +121,6 @@ cpu_pm  = cpus.loc[cpus["name"]==cpu_choice,"passmark_score"].iat[0]
 # Game colour predictions
 # -----------------------------
 st.subheader("Estimated Game Graphics Settings:")
-
 for g in game_requirements:
     st.markdown(f"- **{g}** — {colour_label(g, gpu_fps)}", unsafe_allow_html=True)
 
@@ -148,47 +148,69 @@ if ratio > 1.4 or ratio < 0.6:
         for _,r in better.iterrows():
             st.markdown(f"- {r['name']} ({r['avg_fps']})" )
 
-import plotly.express as px
-
 # -----------------------------
-# GPU scatter (value overview)
+# Plotly visualisations (side-by-side, larger, highlight selected)
 # -----------------------------
+# Prepare GPU df with display attributes
 gpu_df = gpus.copy()
 gpu_df['selected'] = gpu_df['name'] == gpu_choice
+# marker size: selected larger
+gpu_df['marker_size'] = gpu_df['selected'].apply(lambda s: 28 if s else 10)
+# symbol: selected diamond, others circle
+gpu_df['symbol'] = gpu_df['selected'].apply(lambda s: 'diamond' if s else 'circle')
+
 gpu_fig = px.scatter(
     gpu_df,
     x='avg_fps',
     y='name',
     color='selected',
+    symbol='symbol',
+    size='marker_size',
+    size_max=36,
     color_discrete_map={True:'#E94F37', False:'#4ECDC4'},
-    title='GPU Performance (FPS)'
+    title='GPU Performance (FPS)',
+    height=640
 )
+# emphasize selected with thicker outline
+gpu_fig.update_traces(marker=dict(line=dict(width=2, color='Black')))
 gpu_fig.update_layout(
     showlegend=False,
     xaxis_title="Average FPS",
-    yaxis_title=""
+    yaxis_title="",
+    margin=dict(l=10, r=10, t=40, b=10)
 )
 gpu_fig.update_yaxes(categoryorder="total ascending")  # Worst at the bottom
-st.plotly_chart(gpu_fig, use_container_width=True)
 
-# -----------------------------
-# CPU scatter
-# -----------------------------
+# Prepare CPU df with display attributes
 cpu_df = cpus.copy()
 cpu_df['selected'] = cpu_df['name'] == cpu_choice
+cpu_df['marker_size'] = cpu_df['selected'].apply(lambda s: 28 if s else 10)
+cpu_df['symbol'] = cpu_df['selected'].apply(lambda s: 'diamond' if s else 'circle')
+
 cpu_fig = px.scatter(
     cpu_df,
     x='passmark_score',
     y='name',
     color='selected',
+    symbol='symbol',
+    size='marker_size',
+    size_max=36,
     color_discrete_map={True:'#E94F37', False:'#4ECDC4'},
-    title='CPU Performance (PassMark)'
+    title='CPU Performance (PassMark)',
+    height=640
 )
+cpu_fig.update_traces(marker=dict(line=dict(width=2, color='Black')))
 cpu_fig.update_layout(
     showlegend=False,
     xaxis_title="PassMark Score",
-    yaxis_title=""
+    yaxis_title="",
+    margin=dict(l=10, r=10, t=40, b=10)
 )
 cpu_fig.update_yaxes(categoryorder="total ascending")  # Worst at the bottom
-st.plotly_chart(cpu_fig, use_container_width=True)
 
+# Display side-by-side with columns
+col1, col2 = st.columns([1,1])
+with col1:
+    st.plotly_chart(gpu_fig, use_container_width=True)
+with col2:
+    st.plotly_chart(cpu_fig, use_container_width=True)
