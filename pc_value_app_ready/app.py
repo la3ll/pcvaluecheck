@@ -149,9 +149,6 @@ if ratio > 1.4 or ratio < 0.6:
             st.markdown(f"- {r['name']} ({r['avg_fps']})" )
 
 # -----------------------------
-# Plotly visualisations (side-by-side, larger, highlight selected)
-# -----------------------------
-# -----------------------------
 # GPU scatter (value overview)
 # -----------------------------
 gpu_df = gpus.copy()
@@ -165,6 +162,7 @@ gpu_fig = px.scatter(
     title='GPU Performance (FPS)'
 )
 gpu_fig.update_layout(
+    height=1200,  # increased height for more spacing
     showlegend=False,
     xaxis_title="Average FPS",
     yaxis_title=""
@@ -186,6 +184,7 @@ cpu_fig = px.scatter(
     title='CPU Performance (PassMark)'
 )
 cpu_fig.update_layout(
+    height=1200,  # increased height for more spacing
     showlegend=False,
     xaxis_title="PassMark Score",
     yaxis_title=""
