@@ -49,101 +49,61 @@ gpu_data = [
 # CPU data (Passmark-based)
 # -----------------------------
 cpu_data = [
-    ["AMD Ryzen 9 9950X3D", 70102],
-    ["Intel Core Ultra 9 285K", 67488],
-    ["Intel Core Ultra 7 265K", 58853],
-    ["Intel Core i9-14900K", 57623],
-    ["Intel Core i9-14900KF", 57473],
-    ["Intel Core i9-13900K", 56805],
-    ["Intel Core i9-13900KF", 56612],
-    ["Intel Core Ultra 7 265KF", 58707],
-    ["Intel Core Ultra 9 275HX", 56663],
-    ["Intel Core i9-12900K", 40463],
-    ["Intel Core i9-9900K @ 3.60GHz", 17689],
-    ["AMD Ryzen 9 7950X", 61652],
-    ["AMD Ryzen 9 7900X", 50991],
-    ["AMD Ryzen 9 5950X", 44864],
-    ["AMD Ryzen 9 5900X", 38430],
-    ["AMD Ryzen 9 5900HX", 21440],
-    ["Intel Core i7-14700KF", 52027],
-    ["Intel Core i7-14700K", 51530],
-    ["Intel Core i7-13700K", 43935],
-    ["Intel Core i7-12700K", 33539],
-    ["Intel Core i7-14700", 40833],
-    ["Intel Core i7-13700KF", 45040],
-    ["Intel Core i7-12700F", 30126],
-    ["Intel Core i7-10700K @ 3.80GHz", 17849],
-    ["AMD Ryzen 7 9800X3D", 39926],
-    ["AMD Ryzen 7 7800X3D", 34373],
-    ["AMD Ryzen 7 9700X", 37089],
-    ["AMD Ryzen 7 7700X", 35120],
-    ["AMD Ryzen 7 7700", 34534],
-    ["AMD Ryzen 7 5700X3D", 26279],
-    ["AMD Ryzen 7 5700X", 26522],
-    ["AMD Ryzen 7 5800X3D", 28344],
-    ["AMD Ryzen 7 5800XT", 27964],
-    ["AMD Ryzen 7 5800X", 27263],
-    ["AMD Ryzen 7 3700X", 21995],
-    ["Intel Core i5-14600KF", 38421],
-    ["Intel Core i5-14600K", 38929],
-    ["Intel Core i5-14500", 31987],
-    ["Intel Core i5-14400F", 25829],
-    ["Intel Core i5-13600KF", 36981],
-    ["Intel Core i5-13600K", 37308],
-    ["Intel Core i5-13400F", 24799],
-    ["Intel Core i5-12600KF", 28008],
-    ["Intel Core i5-12600K", 27301],
-    ["Intel Core i5-12400F", 19506],
-    ["Intel Core i5-12400", 16340],
-    ["Intel Core i5-12500", 20184],
-    ["Intel Core i5-11400F @ 2.60GHz", 16544],
-    ["Intel Core i5-11400 @ 2.60GHz", 14807],
-    ["Intel Core i5-10400F @ 2.90GHz", 11938],
-    ["Intel Core i5-10400 @ 2.90GHz", 11625],
-    ["Intel Core i5-9600K @ 3.70GHz", 10575],
-    ["Intel Core i5-9400F @ 2.90GHz", 9445],
-    ["AMD Ryzen 5 9600X", 29934],
-    ["AMD Ryzen 5 8600G", 25111],
-    ["AMD Ryzen 5 7600X", 28095],
-    ["AMD Ryzen 5 7600", 26966],
-    ["AMD Ryzen 5 7500F", 26815],
-    ["AMD Ryzen 5 5600X", 21727],
-    ["AMD Ryzen 5 5600", 21472],
-    ["AMD Ryzen 5 5600G", 18965],
-    ["AMD Ryzen 5 5500", 19217],
-    ["AMD Ryzen 5 3600X", 17856],
-    ["AMD Ryzen 5 3600", 17529],
-    ["AMD Ryzen 3 3300X", 13471],
-    ["AMD Ryzen 3 3100", 11211],
-    ["Intel Core i3-12100F", 13885],
-    ["Intel Core i3-12100", 9624]
+    ["AMD Ryzen 9 9950X3D", 70102], ["Intel Core Ultra 9 285K", 67488],
+    ["Intel Core Ultra 7 265K", 58853], ["Intel Core i9-14900K", 57623],
+    ["Intel Core i9-14900KF", 57473], ["Intel Core i9-13900K", 56805],
+    ["Intel Core i9-13900KF", 56612], ["AMD Ryzen 9 7950X", 61652],
+    ["AMD Ryzen 9 7900X", 50991], ["AMD Ryzen 9 5950X", 44864],
+    ["AMD Ryzen 9 5900X", 38430], ["AMD Ryzen 7 9800X3D", 39926],
+    ["AMD Ryzen 7 7800X3D", 34373], ["Intel Core i7-14700KF", 52027],
+    ["Intel Core i7-14700K", 51530], ["Intel Core i7-13700K", 43935],
+    ["Intel Core i7-12700K", 33539], ["AMD Ryzen 7 9700X", 37089],
+    ["AMD Ryzen 7 7700X", 35120], ["AMD Ryzen 7 7700", 34534],
+    ["AMD Ryzen 7 5700X3D", 26279], ["AMD Ryzen 7 5700X", 26522],
+    ["AMD Ryzen 7 5800X3D", 28344], ["AMD Ryzen 7 5800XT", 27964],
+    ["AMD Ryzen 7 5800X", 27263], ["AMD Ryzen 7 3700X", 21995],
+    ["Intel Core i5-14600KF", 38421], ["Intel Core i5-14600K", 38929],
+    ["Intel Core i5-13600KF", 36981], ["Intel Core i5-13600K", 37308],
+    ["Intel Core i5-12600KF", 28008], ["Intel Core i5-12600K", 27301],
+    ["Intel Core i5-12400F", 19506], ["Intel Core i5-12400", 16340],
+    ["AMD Ryzen 5 9600X", 29934], ["AMD Ryzen 5 8600G", 25111],
+    ["AMD Ryzen 5 7600X", 28095], ["AMD Ryzen 5 7600", 26966],
+    ["AMD Ryzen 5 7500F", 26815], ["AMD Ryzen 5 5600X", 21727],
+    ["AMD Ryzen 5 5600", 21472], ["AMD Ryzen 5 5600G", 18965],
+    ["AMD Ryzen 5 5500", 19217], ["AMD Ryzen 5 3600X", 17856],
+    ["AMD Ryzen 5 3600", 17529], ["Intel Core i3-12100F", 13885],
+    ["Intel Core i3-12100", 9624], ["AMD Ryzen 3 3300X", 13471], ["AMD Ryzen 3 3100", 11211]
 ]
 
 gpus = pd.DataFrame(gpu_data, columns=["name", "avg_fps", "low_1_percent"])
 cpus = pd.DataFrame(cpu_data, columns=["name", "passmark_score"])
 
 # -----------------------------
-# Game requirement thresholds
+# Game thresholds
 # -----------------------------
 game_requirements = {
-    "Elden Ring":         {"ultra": 70, "high": 55, "medium": 45},
-    "Cyberpunk 2077":     {"ultra": 75, "high": 60, "medium": 55},
-    "Baldur's Gate 3":    {"ultra": 65, "high": 50, "medium": 50},
-    "Fortnite":           {"ultra": 55, "high": 45, "medium": 30},
-    "Valorant":           {"ultra": 50, "high": 35, "medium": 20},
-    "Minecraft (Java)":   {"ultra": 30, "high": 20, "medium": 10},
-    "The Sims 4":         {"ultra": 40, "high": 25, "medium": 15},
-    "CS2 / CS:GO":        {"ultra": 45, "high": 30, "medium": 20},
-    "GTA V":              {"ultra": 60, "high": 45, "medium": 30},
-    "League of Legends":  {"ultra": 35, "high": 20, "medium": 10}
+    "Elden Ring": {"ultra": 70, "high": 55, "medium": 45},
+    "Cyberpunk 2077": {"ultra": 75, "high": 60, "medium": 55},
+    "Baldur's Gate 3": {"ultra": 65, "high": 50, "medium": 50},
+    "Fortnite": {"ultra": 55, "high": 45, "medium": 30},
+    "Valorant": {"ultra": 50, "high": 35, "medium": 20},
+    "Minecraft (Java)": {"ultra": 30, "high": 20, "medium": 10},
+    "The Sims 4": {"ultra": 40, "high": 25, "medium": 15},
+    "CS2 / CS:GO": {"ultra": 45, "high": 30, "medium": 20},
+    "GTA V": {"ultra": 60, "high": 45, "medium": 30},
+    "League of Legends": {"ultra": 35, "high": 20, "medium": 10}
 }
 
-def colour_setting(game, gpu_score):
+# return a colour+label
+def colour_label(game, fps):
     thr = game_requirements[game]
-    if gpu_score >= thr["ultra"]: return "green"
-    if gpu_score >= thr["high"]:  return "yellow"
-    if gpu_score >= thr["medium"]:return "orange"
-    return "red"
+    if fps >= thr["ultra"]:
+        return '<span style="color:#007f00">🟢 Ultra</span>'
+    if fps >= thr["high"]:
+        return '<span style="color:#f5bd00">🟡 High</span>'
+    if fps >= thr["medium"]:
+        return '<span style="color:#ff7700">🟠 Medium</span>'
+    return '<span style="color:#cc0000">🔴 Low</span>'
 
 # -----------------------------
 # Streamlit UI
@@ -153,46 +113,37 @@ st.title("PC Gaming Build Predictor")
 gpu_choice = st.selectbox("Select GPU", gpus["name"])
 cpu_choice = st.selectbox("Select CPU", cpus["name"])
 
-gpu_fps = gpus.loc[gpus["name"]==gpu_choice, "avg_fps"].values[0]
-cpu_score = cpus.loc[cpus["name"]==cpu_choice, "passmark_score"].values[0]
+gpu_fps = gpus.loc[gpus["name"]==gpu_choice,"avg_fps"].iat[0]
+cpu_pm  = cpus.loc[cpus["name"]==cpu_choice,"passmark_score"].iat[0]
 
 # -----------------------------
-# Game colour recommendations
+# Game colour predictions
 # -----------------------------
-st.subheader("Game Recommendations:")
-for game in game_requirements:
-    col = colour_setting(game, gpu_fps)
-    if col == "red":
-        st.markdown(f"- ⚠️ <span style='color:{col}'>{game}</span>", unsafe_allow_html=True)
-    else:
-        st.markdown(f"- <span style='color:{col}'>{game}</span>", unsafe_allow_html=True)
+st.subheader("Estimated Game Graphics Settings:")
+
+for g in game_requirements:
+    st.markdown(f"- **{g}** — {colour_label(g, gpu_fps)}", unsafe_allow_html=True)
 
 # -----------------------------
-# Ratio-based mismatch check
+# Bottleneck detection
 # -----------------------------
 gpu_norm = gpu_fps / 200
-cpu_norm = cpu_score / 60000
-ratio = gpu_norm / cpu_norm
+cpu_norm = cpu_pm  / 60000
+ratio    = gpu_norm / cpu_norm
 
 if ratio > 1.4 or ratio < 0.6:
-    st.warning("⚠️ Your CPU and GPU are not aligned in performance (possible bottleneck).")
-    
-    if ratio > 1:  # GPU is stronger → find CPUs that match gpu_norm
-        target = gpu_norm * 60000  # convert back to passmark
-        candidates = cpus.copy()
-        candidates["diff"] = (candidates["passmark_score"] - target).abs()
-        suggested = candidates.sort_values("diff").head(3)
-        
-        st.write("Try matching your GPU with one of these CPUs:")
-        for _, row in suggested.iterrows():
-            st.markdown(f"- **{row['name']}** (Passmark: {row['passmark_score']})")
-            
-    else:         # CPU is stronger → find GPUs that match cpu_norm
-        target = cpu_norm * 200    # convert back to avg_fps
-        candidates = gpus.copy()
-        candidates["diff"] = (candidates["avg_fps"] - target).abs()
-        suggested = candidates.sort_values("diff").head(3)
-        
-        st.write("Try matching your CPU with one of these GPUs:")
-        for _, row in suggested.iterrows():
-            st.markdown(f"- **{row['name']}** (avg FPS: {row['avg_fps']})")
+    st.warning("⚠️ Your CPU and GPU are unbalanced (potential bottleneck).")
+    if ratio > 1:
+        target = gpu_norm*60000
+        can = cpus.copy(); can["diff"]=(can["passmark_score"]-target).abs()
+        better = can.sort_values("diff").head(3)
+        st.write("Suggested CPUs instead:")
+        for _,r in better.iterrows():
+            st.markdown(f"- {r['name']} ({r['passmark_score']})" )
+    else:
+        target = cpu_norm*200
+        can = gpus.copy(); can["diff"]=(can["avg_fps"]-target).abs()
+        better = can.sort_values("diff").head(3)
+        st.write("Suggested GPUs instead:")
+        for _,r in better.iterrows():
+            st.markdown(f"- {r['name']} ({r['avg_fps']})" )
