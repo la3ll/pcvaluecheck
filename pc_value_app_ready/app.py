@@ -147,3 +147,38 @@ if ratio > 1.4 or ratio < 0.6:
         st.write("Suggested GPUs instead:")
         for _,r in better.iterrows():
             st.markdown(f"- {r['name']} ({r['avg_fps']})" )
+
+import plotly.express as px
+
+# -----------------------------
+# GPU scatter (value overview)
+# -----------------------------
+gpu_df = gpus.copy()
+gpu_df['selected'] = gpu_df['name'] == gpu_choice
+gpu_fig = px.scatter(
+    gpu_df,
+    x='avg_fps',
+    y='name',
+    color='selected',
+    color_discrete_map={True:'#E94F37', False:'#4ECDC4'},
+    title='GPU Performance (FPS)'
+)
+gpu_fig.update_layout(showlegend=False, xaxis_title="Average FPS", yaxis_title="")
+st.plotly_chart(gpu_fig, use_container_width=True)
+
+# -----------------------------
+# CPU scatter
+# -----------------------------
+cpu_df = cpus.copy()
+cpu_df['selected'] = cpu_df['name'] == cpu_choice
+cpu_fig = px.scatter(
+    cpu_df,
+    x='passmark_score',
+    y='name',
+    color='selected',
+    color_discrete_map={True:'#E94F37', False:'#4ECDC4'},
+    title='CPU Performance (PassMark)'
+)
+cpu_fig.update_layout(showlegend=False, xaxis_title="PassMark Score", yaxis_title="")
+st.plotly_chart(cpu_fig, use_container_width=True)
+
