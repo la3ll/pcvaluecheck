@@ -186,7 +186,7 @@ cpu_fig = px.scatter(
 )
 cpu_fig.update_layout(
     height=1200,  # height of graph
-    with = 800, # width of graph
+    width = 800, # width of graph
     showlegend=False,
     xaxis_title="PassMark Score",
     yaxis_title=""
