@@ -163,7 +163,12 @@ gpu_fig = px.scatter(
     color_discrete_map={True:'#E94F37', False:'#4ECDC4'},
     title='GPU Performance (FPS)'
 )
-gpu_fig.update_layout(showlegend=False, xaxis_title="Average FPS", yaxis_title="")
+gpu_fig.update_layout(
+    showlegend=False,
+    xaxis_title="Average FPS",
+    yaxis_title=""
+)
+gpu_fig.update_yaxes(categoryorder="total ascending")  # Worst at the bottom
 st.plotly_chart(gpu_fig, use_container_width=True)
 
 # -----------------------------
@@ -179,6 +184,11 @@ cpu_fig = px.scatter(
     color_discrete_map={True:'#E94F37', False:'#4ECDC4'},
     title='CPU Performance (PassMark)'
 )
-cpu_fig.update_layout(showlegend=False, xaxis_title="PassMark Score", yaxis_title="")
+cpu_fig.update_layout(
+    showlegend=False,
+    xaxis_title="PassMark Score",
+    yaxis_title=""
+)
+cpu_fig.update_yaxes(categoryorder="total ascending")  # Worst at the bottom
 st.plotly_chart(cpu_fig, use_container_width=True)
 
