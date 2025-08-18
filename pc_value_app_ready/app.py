@@ -111,9 +111,8 @@ def colour_label(game, fps):
 # -----------------------------
 st.title("PC Gaming Build Predictor")
 
-# use keys to avoid duplicate element id issues
-gpu_choice = st.selectbox("Select GPU", gpus["name"], key="gpu_selectbox")
-cpu_choice = st.selectbox("Select CPU", cpus["name"], key="cpu_selectbox")
+gpu_choice = st.selectbox("Select GPU", gpus["name"])
+cpu_choice = st.selectbox("Select CPU", cpus["name"])
 
 gpu_fps = gpus.loc[gpus["name"]==gpu_choice,"avg_fps"].iat[0]
 cpu_pm  = cpus.loc[cpus["name"]==cpu_choice,"passmark_score"].iat[0]
@@ -148,38 +147,27 @@ if ratio > 1.4 or ratio < 0.6:
         st.write("Suggested GPUs instead:")
         for _,r in better.iterrows():
             st.markdown(f"- {r['name']} ({r['avg_fps']})" )
-
+            
 # -----------------------------
 # GPU scatter (value overview)
 # -----------------------------
 gpu_df = gpus.copy()
 gpu_df['selected'] = gpu_df['name'] == gpu_choice
-
-# dynamic height but compressed spacing: fewer pixels per row than before
-gpu_height = max(500, 80 + len(gpu_df) * 18)
-
 gpu_fig = px.scatter(
     gpu_df,
     x='avg_fps',
     y='name',
     color='selected',
     color_discrete_map={True:'#E94F37', False:'#4ECDC4'},
-    title='GPU Performance (FPS)',
-    width=None,
-    height=gpu_height
+    title='GPU Performance (FPS)'
 )
 gpu_fig.update_layout(
+    height=1200,  # increased spacing between lines
     showlegend=False,
     xaxis_title="Average FPS",
-    yaxis_title="",
-    margin=dict(l=80, r=40, t=60, b=40)  # tighter left margin
+    yaxis_title=""
 )
-gpu_fig.update_yaxes(
-    categoryorder="total ascending",
-    automargin=True,
-    ticklabelposition="inside",
-    tickangle=0
-)
+gpu_fig.update_yaxes(categoryorder="total ascending")  # Worst at the bottom
 st.plotly_chart(gpu_fig, use_container_width=True)
 
 # -----------------------------
@@ -187,29 +175,19 @@ st.plotly_chart(gpu_fig, use_container_width=True)
 # -----------------------------
 cpu_df = cpus.copy()
 cpu_df['selected'] = cpu_df['name'] == cpu_choice
-
-cpu_height = max(500, 80 + len(cpu_df) * 18)
-
 cpu_fig = px.scatter(
     cpu_df,
     x='passmark_score',
     y='name',
     color='selected',
     color_discrete_map={True:'#E94F37', False:'#4ECDC4'},
-    title='CPU Performance (PassMark)',
-    width=None,
-    height=cpu_height
+    title='CPU Performance (PassMark)'
 )
 cpu_fig.update_layout(
+    height=1200,  # increased spacing
     showlegend=False,
     xaxis_title="PassMark Score",
-    yaxis_title="",
-    margin=dict(l=80, r=40, t=60, b=40)  # tighter left margin
+    yaxis_title=""
 )
-cpu_fig.update_yaxes(
-    categoryorder="total ascending",
-    automargin=True,
-    ticklabelposition="inside",
-    tickangle=0
-)
+cpu_fig.update_yaxes(categoryorder="total ascending")  # Worst at the bottom
 st.plotly_chart(cpu_fig, use_container_width=True)
