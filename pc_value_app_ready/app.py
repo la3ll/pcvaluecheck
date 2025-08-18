@@ -207,10 +207,3 @@ cpu_fig.update_layout(
     margin=dict(l=10, r=10, t=40, b=10)
 )
 cpu_fig.update_yaxes(categoryorder="total ascending")  # Worst at the bottom
-
-# Display side-by-side with columns
-col1, col2 = st.columns([1,1])
-with col1:
-    st.plotly_chart(gpu_fig, use_container_width=True)
-with col2:
-    st.plotly_chart(cpu_fig, use_container_width=True)
