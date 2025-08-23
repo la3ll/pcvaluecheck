@@ -8,7 +8,7 @@ try:
 except Exception:
     PLOTLY_OK = False
 
-st.set_page_config(page_title="Game-first PC Build Recommender", layout="wide")
+st.set_page_config(page_title="Please enter the games you want to play", layout="wide")
 
 # -----------------------------
 # GPU data (FPS-based strength)
