@@ -82,8 +82,7 @@ cpu_data = [
     ["AMD Ryzen 5 5600", 21472], ["AMD Ryzen 5 5600G", 18965],
     ["AMD Ryzen 5 5500", 19217], ["AMD Ryzen 5 3600X", 17856],
     ["AMD Ryzen 5 3600", 17529], ["Intel Core i3-12100F", 13885],
-    ["Intel Core i3-12100", 9624], ["AMD Ryzen 3 3300X", 13471],
-    ["AMD Ryzen 3 3100", 11211]
+    ["Intel Core i3-12100", 9624], ["AMD Ryzen 3 3300X", 13471], ["AMD Ryzen 3 3100", 11211]
 ]
 cpus = pd.DataFrame(cpu_data, columns=["name", "passmark_score"])
 
