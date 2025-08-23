@@ -109,7 +109,7 @@ def colour_label(game, fps):
 # -----------------------------
 # Streamlit UI
 # -----------------------------
-st.title("PC Gaming Build Predictor")
+st.title("Add your components below then check the graphs to see the benchmarks")
 
 gpu_choice = st.selectbox("Select GPU", gpus["name"])
 cpu_choice = st.selectbox("Select CPU", cpus["name"])
