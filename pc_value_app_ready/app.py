@@ -1,53 +1,62 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
+
+# Try Plotly (falls back gracefully with a message if not installed)
+try:
+    import plotly.express as px
+    PLOTLY_OK = True
+except Exception:
+    PLOTLY_OK = False
+
+st.set_page_config(page_title="Game-first PC Build Recommender", layout="wide")
 
 # -----------------------------
 # GPU data (FPS-based strength)
 # -----------------------------
 gpu_data = [
-    ["NVIDIA RTX 5090 FE",214.3,150.9],
-    ["NVIDIA RTX 4090 Cybertank",189.6,151.6],
-    ["NVIDIA RTX 5080 FE",165.1,134.4],
-    ["Sapphire RX 7900 XTX Nitro",155.6,122.5],
-    ["ASUS RTX 5070 Ti Prime",151.4,124.4],
-    ["Sapphire RX 9070 XT Pulse",144.6,113.7],
-    ["PowerColor RX 7900 XT Hellhound",133.9,106.2],
-    ["Sapphire RX 9070 Pulse",133.5,101.9],
-    ["ASUS RTX 4070 Ti TUF",128.3,105.9],
-    ["NVIDIA RTX 5070 FE",125.6,103.1],
-    ["Sapphire RX 7900 GRE Pulse",111.7,89.7],
-    ["Sapphire RX 6950 XT Nitro",106.8,79.3],
-    ["NVIDIA RTX 4070 FE",104.0,85.4],
-    ["AMD RX 7800 XT Red",100.5,78.3],
-    ["EVGA RTX 3080 FTW3 Ultra",96.8,79.8],
-    ["PNY RTX 5060 Ti 16GB",92.5,76.3],
-    ["XFX RX 7700 XT Black",87.3,68.4],
-    ["Sapphire RX 9060 XT 16GB Pulse",85.8,67.8],
-    ["NVIDIA RTX 3070 Ti FE",84.2,68.6],
-    ["NVIDIA RTX 4060 Ti FE",77.8,64.7],
-    ["Colorful RTX 3070 Bilibili",77.2,63.6],
-    ["Gigabyte RTX 5060 Eagle OC",76.1,62.4],
-    ["EVGA RTX 3060 Ti FTW3",68.2,55.5],
-    ["XFX RX 6700 XT MERC Black",68.1,51.3],
-    ["ASUS RTX 4060 Dual",61.7,49.4],
-    ["AMD RX 7600 Red",60.4,47.4],
-    ["PowerColor RX 6600 XT Red Devil",57.8,45.7],
-    ["Intel Arc B580 RE",54.5,44.8],
-    ["EVGA RTX 2070 Super XC Ultra",51.8,40.9],
-    ["Acer Arc A770 BiFrost",51.6,43.0],
-    ["EVGA RTX 3060 XC Black",51.6,41.7],
-    ["EVGA RTX 2070",50.7,41.1],
-    ["Sparkle Arc A750 Titan",49.2,40.9],
-    ["XFX RX 6600 CORE",48.9,38.7],
-    ["EVGA RTX 2060 KO",39.8,31.6],
-    ["EVGA RTX 3050 XC Black",37.8,30.4],
-    ["EVGA GTX 1070 SC",30.9,24.4],
-    ["EVGA GTX 1060 SSC",22.6,17.8]
+    ["NVIDIA RTX 5090 FE",214.3],
+    ["NVIDIA RTX 4090 Cybertank",189.6],
+    ["NVIDIA RTX 5080 FE",165.1],
+    ["Sapphire RX 7900 XTX Nitro",155.6],
+    ["ASUS RTX 5070 Ti Prime",151.4],
+    ["Sapphire RX 9070 XT Pulse",144.6],
+    ["PowerColor RX 7900 XT Hellhound",133.9],
+    ["Sapphire RX 9070 Pulse",133.5],
+    ["ASUS RTX 4070 Ti TUF",128.3],
+    ["NVIDIA RTX 5070 FE",125.6],
+    ["Sapphire RX 7900 GRE Pulse",111.7],
+    ["Sapphire RX 6950 XT Nitro",106.8],
+    ["NVIDIA RTX 4070 FE",104.0],
+    ["AMD RX 7800 XT Red",100.5],
+    ["EVGA RTX 3080 FTW3 Ultra",96.8],
+    ["PNY RTX 5060 Ti 16GB",92.5],
+    ["XFX RX 7700 XT Black",87.3],
+    ["Sapphire RX 9060 XT 16GB Pulse",85.8],
+    ["NVIDIA RTX 3070 Ti FE",84.2],
+    ["NVIDIA RTX 4060 Ti FE",77.8],
+    ["Colorful RTX 3070 Bilibili",77.2],
+    ["Gigabyte RTX 5060 Eagle OC",76.1],
+    ["EVGA RTX 3060 Ti FTW3",68.2],
+    ["XFX RX 6700 XT MERC Black",68.1],
+    ["ASUS RTX 4060 Dual",61.7],
+    ["AMD RX 7600 Red",60.4],
+    ["PowerColor RX 6600 XT Red Devil",57.8],
+    ["Intel Arc B580 RE",54.5],
+    ["EVGA RTX 2070 Super XC Ultra",51.8],
+    ["Acer Arc A770 BiFrost",51.6],
+    ["EVGA RTX 3060 XC Black",51.6],
+    ["EVGA RTX 2070",50.7],
+    ["Sparkle Arc A750 Titan",49.2],
+    ["XFX RX 6600 CORE",48.9],
+    ["EVGA RTX 2060 KO",39.8],
+    ["EVGA RTX 3050 XC Black",37.8],
+    ["EVGA GTX 1070 SC",30.9],
+    ["EVGA GTX 1060 SSC",22.6]
 ]
+gpus = pd.DataFrame(gpu_data, columns=["name", "avg_fps"])
 
 # -----------------------------
-# CPU data (Passmark-based)
+# CPU data (Passmark-based) — full list you provided
 # -----------------------------
 cpu_data = [
     ["AMD Ryzen 9 9950X3D", 70102], ["Intel Core Ultra 9 285K", 67488],
@@ -73,121 +82,126 @@ cpu_data = [
     ["AMD Ryzen 5 5600", 21472], ["AMD Ryzen 5 5600G", 18965],
     ["AMD Ryzen 5 5500", 19217], ["AMD Ryzen 5 3600X", 17856],
     ["AMD Ryzen 5 3600", 17529], ["Intel Core i3-12100F", 13885],
-    ["Intel Core i3-12100", 9624], ["AMD Ryzen 3 3300X", 13471], ["AMD Ryzen 3 3100", 11211]
+    ["Intel Core i3-12100", 9624], ["AMD Ryzen 3 3300X", 13471],
+    ["AMD Ryzen 3 3100", 11211]
 ]
-
-gpus = pd.DataFrame(gpu_data, columns=["name", "avg_fps", "low_1_percent"])
 cpus = pd.DataFrame(cpu_data, columns=["name", "passmark_score"])
 
 # -----------------------------
-# Game thresholds
+# Game requirement thresholds
 # -----------------------------
 game_requirements = {
-    "Elden Ring": {"ultra": 70, "high": 55, "medium": 45},
-    "Cyberpunk 2077": {"ultra": 75, "high": 60, "medium": 50},
-    "Baldur's Gate 3": {"ultra": 65, "high": 50, "medium": 45},
-    "Fortnite": {"ultra": 55, "high": 40, "medium": 20},
-    "Valorant": {"ultra": 50, "high": 35, "medium": 20},
-    "Minecraft (Java)": {"ultra": 30, "high": 20, "medium": 10},
-    "The Sims 4": {"ultra": 40, "high": 25, "medium": 5},
-    "CS2 / CS:GO": {"ultra": 45, "high": 30, "medium": 15},
-    "GTA V": {"ultra": 60, "high": 45, "medium": 30},
-    "League of Legends": {"ultra": 35, "high": 20, "medium": 10}
+    "Elden Ring":         {"ultra": 70, "high": 55, "medium": 45},
+    "Cyberpunk 2077":     {"ultra": 75, "high": 60, "medium": 55},
+    "Baldur's Gate 3":    {"ultra": 65, "high": 50, "medium": 50},
+    "Fortnite":           {"ultra": 55, "high": 45, "medium": 30},
+    "Valorant":           {"ultra": 50, "high": 35, "medium": 20},
+    "Minecraft (Java)":   {"ultra": 30, "high": 20, "medium": 10},
+    "The Sims 4":         {"ultra": 40, "high": 25, "medium": 15},
+    "CS2 / CS:GO":        {"ultra": 45, "high": 30, "medium": 20},
+    "GTA V":              {"ultra": 60, "high": 45, "medium": 30},
+    "League of Legends":  {"ultra": 35, "high": 20, "medium": 10}
 }
 
-# return a colour+label
-def colour_label(game, fps):
-    thr = game_requirements[game]
-    if fps >= thr["ultra"]:
-        return '<span style="color:#007f00">🟢 Ultra</span>'
-    if fps >= thr["high"]:
-        return '<span style="color:#f5bd00">🟡 High</span>'
-    if fps >= thr["medium"]:
-        return '<span style="color:#ff7700">🟠 Medium</span>'
-    return '<span style="color:#cc0000">🔴 Low</span>'
-
 # -----------------------------
-# Streamlit UI
+# UI
 # -----------------------------
-st.title("Add your components then check the graphs below to see the benchmarks")
+st.title("🎮 Game-first PC Build Recommender")
 
-gpu_choice = st.selectbox("Select GPU", gpus["name"])
-cpu_choice = st.selectbox("Select CPU", cpus["name"])
+tabs = st.tabs(["Recommendations", "Performance Graphs"])
 
-gpu_fps = gpus.loc[gpus["name"]==gpu_choice,"avg_fps"].iat[0]
-cpu_pm  = cpus.loc[cpus["name"]==cpu_choice,"passmark_score"].iat[0]
+# ===== Tab 1: Recommendations =====
+with tabs[0]:
+    selected_games = st.multiselect(
+        "Select the games you want to play:",
+        list(game_requirements.keys()),
+        help="Pick a few titles. We'll compute the hardest requirement across them."
+    )
 
-# -----------------------------
-# Game colour predictions
-# -----------------------------
-st.subheader("Estimated Game Graphics Settings:")
-for g in game_requirements:
-    st.markdown(f"- **{g}** — {colour_label(g, gpu_fps)}", unsafe_allow_html=True)
+    if selected_games:
+        # hardest requirement across selected games
+        reqs = {"ultra":0, "high":0, "medium":0}
+        for game in selected_games:
+            for tier in reqs:
+                reqs[tier] = max(reqs[tier], game_requirements[game][tier])
 
-# -----------------------------
-# Bottleneck detection
-# -----------------------------
-gpu_norm = gpu_fps / 200
-cpu_norm = cpu_pm  / 60000
-ratio    = gpu_norm / cpu_norm
+        # GPUs that meet requirements
+        ultra_gpus  = gpus[gpus["avg_fps"] >= reqs["ultra"]]
+        high_gpus   = gpus[gpus["avg_fps"] >= reqs["high"]]
+        medium_gpus = gpus[gpus["avg_fps"] >= reqs["medium"]]
 
-if ratio > 1.4 or ratio < 0.6:
-    st.warning("⚠️ Your CPU and GPU are unbalanced (potential bottleneck).")
-    if ratio > 1:
-        target = gpu_norm*60000
-        can = cpus.copy(); can["diff"]=(can["passmark_score"]-target).abs()
-        better = can.sort_values("diff").head(3)
-        st.write("Suggested CPUs instead:")
-        for _,r in better.iterrows():
-            st.markdown(f"- {r['name']} ({r['passmark_score']})" )
+        # Simple CPU tiers (guides)
+        ultra_cpus  = cpus[cpus["passmark_score"] >= 40000]
+        high_cpus   = cpus[cpus["passmark_score"] >= 25000]
+        medium_cpus = cpus[cpus["passmark_score"] >= 15000]
+
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.subheader("✅ Ultra")
+            st.write("**GPUs:**", ", ".join(ultra_gpus["name"].head(6)))
+            st.write("**CPUs:**", ", ".join(ultra_cpus["name"].head(6)))
+        with c2:
+            st.subheader("⚡ High")
+            st.write("**GPUs:**", ", ".join(high_gpus["name"].head(6)))
+            st.write("**CPUs:**", ", ".join(high_cpus["name"].head(6)))
+        with c3:
+            st.subheader("💰 Medium")
+            st.write("**GPUs:**", ", ".join(medium_gpus["name"].head(6)))
+            st.write("**CPUs:**", ", ".join(medium_cpus["name"].head(6)))
+
+        st.caption(
+            "Notes: GPU thresholds are derived from the hardest selected game. "
+            "CPU tiers are simple PassMark guides (≥40k Ultra, ≥25k High, ≥15k Medium)."
+        )
     else:
-        target = cpu_norm*200
-        can = gpus.copy(); can["diff"]=(can["avg_fps"]-target).abs()
-        better = can.sort_values("diff").head(3)
-        st.write("Suggested GPUs instead:")
-        for _,r in better.iterrows():
-            st.markdown(f"- {r['name']} ({r['avg_fps']})" )
-            
-# -----------------------------
-# GPU scatter (value overview)
-# -----------------------------
-gpu_df = gpus.copy()
-gpu_df['selected'] = gpu_df['name'] == gpu_choice
-gpu_fig = px.scatter(
-    gpu_df,
-    x='avg_fps',
-    y='name',
-    color='selected',
-    color_discrete_map={True:'#E94F37', False:'#4ECDC4'},
-    title='GPU Performance (FPS)'
-)
-gpu_fig.update_layout(
-    height=1200,  # increased spacing between lines
-    showlegend=False,
-    xaxis_title="Average FPS",
-    yaxis_title=""
-)
-gpu_fig.update_yaxes(categoryorder="total ascending")  # Worst at the bottom
-st.plotly_chart(gpu_fig, use_container_width=True)
+        st.info("Pick at least one game to see recommended hardware tiers.")
 
-# -----------------------------
-# CPU scatter
-# -----------------------------
-cpu_df = cpus.copy()
-cpu_df['selected'] = cpu_df['name'] == cpu_choice
-cpu_fig = px.scatter(
-    cpu_df,
-    x='passmark_score',
-    y='name',
-    color='selected',
-    color_discrete_map={True:'#E94F37', False:'#4ECDC4'},
-    title='CPU Performance (PassMark)'
-)
-cpu_fig.update_layout(
-    height=1200,  # increased spacing
-    showlegend=False,
-    xaxis_title="PassMark Score",
-    yaxis_title=""
-)
-cpu_fig.update_yaxes(categoryorder="total ascending")  # Worst at the bottom
-st.plotly_chart(cpu_fig, use_container_width=True)
+# ===== Tab 2: Performance Graphs =====
+with tabs[1]:
+    if not PLOTLY_OK:
+        st.error("Plotly is not installed. Add `plotly` to your requirements.txt or run `pip install plotly` to see the charts.")
+    else:
+        left, right = st.columns(2)
+
+        # GPU scatter (horizontal), sorted by performance
+        with left:
+            st.subheader("GPU Performance Spectrum")
+            g_sorted = gpus.sort_values("avg_fps")
+            fig_gpu = px.scatter(
+                g_sorted,
+                x="avg_fps", y="name",
+                hover_data={"avg_fps": True, "name": True},
+                labels={"avg_fps": "Relative GPU performance (avg FPS)", "name": "GPU"},
+                title="All GPUs (higher is faster)",
+                height=800
+            )
+            # If games are selected, add requirement guide lines
+            if "selected_games" in locals() and selected_games:
+                reqs = {"ultra":0, "high":0, "medium":0}
+                for game in selected_games:
+                    for tier in reqs:
+                        reqs[tier] = max(reqs[tier], game_requirements[game][tier])
+                fig_gpu.add_vline(x=reqs["medium"], line_dash="dot", annotation_text="Medium req", annotation_position="top")
+                fig_gpu.add_vline(x=reqs["high"],   line_dash="dash", annotation_text="High req",   annotation_position="top")
+                fig_gpu.add_vline(x=reqs["ultra"],  line_dash=None,   annotation_text="Ultra req",  annotation_position="top")
+            st.plotly_chart(fig_gpu, use_container_width=True)
+            st.caption("Hover to see exact model. Vertical lines show the hardest requirement for the games you selected (if any).")
+
+        # CPU scatter (horizontal), sorted by PassMark
+        with right:
+            st.subheader("CPU Performance Spectrum (PassMark)")
+            c_sorted = cpus.sort_values("passmark_score")
+            fig_cpu = px.scatter(
+                c_sorted,
+                x="passmark_score", y="name",
+                hover_data={"passmark_score": True, "name": True},
+                labels={"passmark_score": "PassMark score (higher is faster)", "name": "CPU"},
+                title="All CPUs (higher is faster)",
+                height=800
+            )
+            # Guide lines for simple tiers
+            fig_cpu.add_vline(x=15000, line_dash="dot", annotation_text="~Medium tier", annotation_position="top")
+            fig_cpu.add_vline(x=25000, line_dash="dash", annotation_text="~High tier",   annotation_position="top")
+            fig_cpu.add_vline(x=40000, line_dash=None,   annotation_text="~Ultra tier",  annotation_position="top")
+            st.plotly_chart(fig_cpu, use_container_width=True)
+            st.caption("Guide lines mark rough tiers used in recommendations (~15k / 25k / 40k PassMark).")
