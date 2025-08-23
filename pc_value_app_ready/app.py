@@ -84,13 +84,13 @@ cpus = pd.DataFrame(cpu_data, columns=["name", "passmark_score"])
 # -----------------------------
 game_requirements = {
     "Elden Ring": {"ultra": 70, "high": 55, "medium": 45},
-    "Cyberpunk 2077": {"ultra": 75, "high": 60, "medium": 55},
-    "Baldur's Gate 3": {"ultra": 65, "high": 50, "medium": 50},
-    "Fortnite": {"ultra": 55, "high": 45, "medium": 30},
+    "Cyberpunk 2077": {"ultra": 75, "high": 60, "medium": 50},
+    "Baldur's Gate 3": {"ultra": 65, "high": 50, "medium": 45},
+    "Fortnite": {"ultra": 55, "high": 40, "medium": 20},
     "Valorant": {"ultra": 50, "high": 35, "medium": 20},
     "Minecraft (Java)": {"ultra": 30, "high": 20, "medium": 10},
-    "The Sims 4": {"ultra": 40, "high": 25, "medium": 15},
-    "CS2 / CS:GO": {"ultra": 45, "high": 30, "medium": 20},
+    "The Sims 4": {"ultra": 40, "high": 25, "medium": 5},
+    "CS2 / CS:GO": {"ultra": 45, "high": 30, "medium": 15},
     "GTA V": {"ultra": 60, "high": 45, "medium": 30},
     "League of Legends": {"ultra": 35, "high": 20, "medium": 10}
 }
