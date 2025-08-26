@@ -97,7 +97,7 @@ def recommend_components(game, quality):
 st.title("PC Part Performance & Recommendations")
 
 game_choice = st.selectbox("Select a game", list(game_requirements.keys()))
-quality_choice = st.selectbox("Select quality", ["ultra", "high", "medium"])
+quality_choice = st.selectbox("Select quality", ["Ultra", "High", "Medium"])
 
 if st.button("Get Recommendations"):
     gpu_recs, cpu_recs = recommend_components(game_choice, quality_choice)
