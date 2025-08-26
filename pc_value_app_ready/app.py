@@ -1,63 +1,10 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
-# Try Plotly (falls back gracefully with a message if not installed)
-try:
-    import plotly.express as px
-    PLOTLY_OK = True
-except Exception:
-    PLOTLY_OK = False
-
-st.set_page_config(page_title="Please enter the games you want to play", layout="wide")
-
-# -----------------------------
-# GPU data (FPS-based strength)
-# -----------------------------
-gpu_data = [
-    ["NVIDIA RTX 5090 FE",214.3],
-    ["NVIDIA RTX 4090 Cybertank",189.6],
-    ["NVIDIA RTX 5080 FE",165.1],
-    ["Sapphire RX 7900 XTX Nitro",155.6],
-    ["ASUS RTX 5070 Ti Prime",151.4],
-    ["Sapphire RX 9070 XT Pulse",144.6],
-    ["PowerColor RX 7900 XT Hellhound",133.9],
-    ["Sapphire RX 9070 Pulse",133.5],
-    ["ASUS RTX 4070 Ti TUF",128.3],
-    ["NVIDIA RTX 5070 FE",125.6],
-    ["Sapphire RX 7900 GRE Pulse",111.7],
-    ["Sapphire RX 6950 XT Nitro",106.8],
-    ["NVIDIA RTX 4070 FE",104.0],
-    ["AMD RX 7800 XT Red",100.5],
-    ["EVGA RTX 3080 FTW3 Ultra",96.8],
-    ["PNY RTX 5060 Ti 16GB",92.5],
-    ["XFX RX 7700 XT Black",87.3],
-    ["Sapphire RX 9060 XT 16GB Pulse",85.8],
-    ["NVIDIA RTX 3070 Ti FE",84.2],
-    ["NVIDIA RTX 4060 Ti FE",77.8],
-    ["Colorful RTX 3070 Bilibili",77.2],
-    ["Gigabyte RTX 5060 Eagle OC",76.1],
-    ["EVGA RTX 3060 Ti FTW3",68.2],
-    ["XFX RX 6700 XT MERC Black",68.1],
-    ["ASUS RTX 4060 Dual",61.7],
-    ["AMD RX 7600 Red",60.4],
-    ["PowerColor RX 6600 XT Red Devil",57.8],
-    ["Intel Arc B580 RE",54.5],
-    ["EVGA RTX 2070 Super XC Ultra",51.8],
-    ["Acer Arc A770 BiFrost",51.6],
-    ["EVGA RTX 3060 XC Black",51.6],
-    ["EVGA RTX 2070",50.7],
-    ["Sparkle Arc A750 Titan",49.2],
-    ["XFX RX 6600 CORE",48.9],
-    ["EVGA RTX 2060 KO",39.8],
-    ["EVGA RTX 3050 XC Black",37.8],
-    ["EVGA GTX 1070 SC",30.9],
-    ["EVGA GTX 1060 SSC",22.6]
-]
-gpus = pd.DataFrame(gpu_data, columns=["name", "avg_fps"])
-
-# -----------------------------
-# CPU data (Passmark-based) — full list you provided
-# -----------------------------
+# ===============================
+# Component Performance Data
+# ===============================
 cpu_data = [
     ["AMD Ryzen 9 9950X3D", 70102], ["Intel Core Ultra 9 285K", 67488],
     ["Intel Core Ultra 7 265K", 58853], ["Intel Core i9-14900K", 57623],
@@ -82,125 +29,106 @@ cpu_data = [
     ["AMD Ryzen 5 5600", 21472], ["AMD Ryzen 5 5600G", 18965],
     ["AMD Ryzen 5 5500", 19217], ["AMD Ryzen 5 3600X", 17856],
     ["AMD Ryzen 5 3600", 17529], ["Intel Core i3-12100F", 13885],
-    ["Intel Core i3-12100", 9624], ["AMD Ryzen 3 3300X", 13471], ["AMD Ryzen 3 3100", 11211]
+    ["Intel Core i3-12100", 9624], ["AMD Ryzen 3 3300X", 13471],
+    ["AMD Ryzen 3 3100", 11211]
 ]
-cpus = pd.DataFrame(cpu_data, columns=["name", "passmark_score"])
 
-# -----------------------------
-# Game requirement thresholds
-# -----------------------------
+gpu_data = [
+    ["NVIDIA RTX 5090", 60000], ["NVIDIA RTX 5080", 50000],
+    ["NVIDIA RTX 5070 Ti", 40000], ["NVIDIA RTX 5070", 37000],
+    ["NVIDIA RTX 4090", 45000], ["NVIDIA RTX 4080", 38000],
+    ["NVIDIA RTX 4070 Ti", 30000], ["NVIDIA RTX 4070", 27000],
+    ["NVIDIA RTX 4060 Ti", 22000], ["NVIDIA RTX 4060", 20000],
+    ["NVIDIA RTX 3090 Ti", 25000], ["NVIDIA RTX 3090", 23000],
+    ["NVIDIA RTX 3080 Ti", 21000], ["NVIDIA RTX 3080", 19000],
+    ["NVIDIA RTX 3070 Ti", 17000], ["NVIDIA RTX 3070", 15000],
+    ["NVIDIA RTX 3060 Ti", 14000], ["NVIDIA RTX 3060", 12000],
+    ["AMD RX 7900 XTX", 43000], ["AMD RX 7900 XT", 40000],
+    ["AMD RX 7800 XT", 30000], ["AMD RX 7700 XT", 25000],
+    ["AMD RX 7600 XT", 18000], ["AMD RX 7600", 16000],
+    ["AMD RX 6900 XT", 22000], ["AMD RX 6800 XT", 20000],
+    ["AMD RX 6800", 19000], ["AMD RX 6700 XT", 15000],
+    ["AMD RX 6600 XT", 12000], ["AMD RX 6600", 10000]
+]
+
+# Turn into DataFrames
+cpus = pd.DataFrame(cpu_data, columns=["name", "PassMark"])
+gpus = pd.DataFrame(gpu_data, columns=["name", "score"])
+
+# ===============================
+# PCPartPicker Search Links
+# ===============================
+lookup_links = {}
+
+for cpu in cpus["name"]:
+    query = cpu.replace(" ", "+")
+    lookup_links[cpu] = f"https://pcpartpicker.com/search/?q={query}"
+
+for gpu in gpus["name"]:
+    query = gpu.replace(" ", "+")
+    lookup_links[gpu] = f"https://pcpartpicker.com/search/?q={query}"
+
+# ===============================
+# Game Requirements (simplified)
+# ===============================
 game_requirements = {
-    "Elden Ring":         {"ultra": 70, "high": 55, "medium": 45},
-    "Cyberpunk 2077":     {"ultra": 75, "high": 60, "medium": 55},
-    "Baldur's Gate 3":    {"ultra": 65, "high": 50, "medium": 50},
-    "Fortnite":           {"ultra": 55, "high": 45, "medium": 30},
-    "Valorant":           {"ultra": 50, "high": 35, "medium": 20},
-    "Minecraft (Java)":   {"ultra": 30, "high": 20, "medium": 10},
-    "The Sims 4":         {"ultra": 40, "high": 25, "medium": 15},
-    "CS2 / CS:GO":        {"ultra": 45, "high": 30, "medium": 20},
-    "GTA V":              {"ultra": 60, "high": 45, "medium": 30},
-    "League of Legends":  {"ultra": 35, "high": 20, "medium": 10}
+    "Cyberpunk 2077": {"ultra": 45000, "high": 30000, "medium": 20000},
+    "Elden Ring": {"ultra": 35000, "high": 25000, "medium": 18000},
+    "GTA V": {"ultra": 30000, "high": 22000, "medium": 15000},
+    "The Sims 4": {"ultra": 12000, "high": 8000, "medium": 6000},
+    "Minecraft": {"ultra": 10000, "high": 7000, "medium": 5000}
 }
 
-# -----------------------------
-# UI
-# -----------------------------
-st.title("🎮 Game-first PC Build Recommender")
+# ===============================
+# Helper Functions
+# ===============================
+def recommend_components(game, quality):
+    thr = game_requirements[game][quality]
+    cap = int(thr * 1.5)  # 50% higher cap
+    
+    gpu_recs = gpus[(gpus["score"] >= thr) & (gpus["score"] <= cap)].nsmallest(4, "score")
+    cpu_recs = cpus[(cpus["PassMark"] >= thr) & (cpus["PassMark"] <= cap)].nsmallest(4, "PassMark")
+    
+    return gpu_recs, cpu_recs
 
-tabs = st.tabs(["Recommendations", "Performance Graphs"])
+# ===============================
+# Streamlit App Layout
+# ===============================
+st.title("PC Part Performance & Recommendations")
 
-# ===== Tab 1: Recommendations =====
-with tabs[0]:
-    selected_games = st.multiselect(
-        "Select the games you want to play:",
-        list(game_requirements.keys()),
-        help="Pick a few titles. We'll compute the hardest requirement across them."
-    )
+game_choice = st.selectbox("Select a game", list(game_requirements.keys()))
+quality_choice = st.selectbox("Select quality", ["ultra", "high", "medium"])
 
-    if selected_games:
-        # hardest requirement across selected games
-        reqs = {"ultra":0, "high":0, "medium":0}
-        for game in selected_games:
-            for tier in reqs:
-                reqs[tier] = max(reqs[tier], game_requirements[game][tier])
+if st.button("Get Recommendations"):
+    gpu_recs, cpu_recs = recommend_components(game_choice, quality_choice)
 
-        # GPUs that meet requirements
-        ultra_gpus  = gpus[gpus["avg_fps"] >= reqs["ultra"]]
-        high_gpus   = gpus[gpus["avg_fps"] >= reqs["high"]]
-        medium_gpus = gpus[gpus["avg_fps"] >= reqs["medium"]]
+    st.subheader("Recommended GPUs")
+    for _, row in gpu_recs.iterrows():
+        name = row["name"]
+        url = lookup_links.get(name, "#")
+        st.markdown(f"- [{name}]({url}) — Score: {row['score']}")
 
-        # Simple CPU tiers (guides)
-        ultra_cpus  = cpus[cpus["passmark_score"] >= 40000]
-        high_cpus   = cpus[cpus["passmark_score"] >= 25000]
-        medium_cpus = cpus[cpus["passmark_score"] >= 15000]
+    st.subheader("Recommended CPUs")
+    for _, row in cpu_recs.iterrows():
+        name = row["name"]
+        url = lookup_links.get(name, "#")
+        st.markdown(f"- [{name}]({url}) — PassMark: {row['PassMark']}")
 
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.subheader("✅ Ultra")
-            st.write("**GPUs:**", ", ".join(ultra_gpus["name"].head(6)))
-            st.write("**CPUs:**", ", ".join(ultra_cpus["name"].head(6)))
-        with c2:
-            st.subheader("⚡ High")
-            st.write("**GPUs:**", ", ".join(high_gpus["name"].head(6)))
-            st.write("**CPUs:**", ", ".join(high_cpus["name"].head(6)))
-        with c3:
-            st.subheader("💰 Medium")
-            st.write("**GPUs:**", ", ".join(medium_gpus["name"].head(6)))
-            st.write("**CPUs:**", ", ".join(medium_cpus["name"].head(6)))
+# ===============================
+# Scatter Graphs with Links
+# ===============================
+st.subheader("CPU Performance Spectrum")
+cpus["link"] = cpus["name"].apply(lambda x: lookup_links[x])
+cpus["hover"] = cpus.apply(lambda r: f"<a href='{r['link']}' target='_blank'>{r['name']}</a><br>PassMark: {r['PassMark']}", axis=1)
 
-        st.caption(
-            "Notes: GPU thresholds are derived from the hardest selected game. "
-            "CPU tiers are simple PassMark guides (≥40k Ultra, ≥25k High, ≥15k Medium)."
-        )
-    else:
-        st.info("Pick at least one game to see recommended hardware tiers.")
+fig_cpu = px.scatter(cpus, x="name", y="PassMark", title="CPU PassMark Scores", size="PassMark", hover_name="name", hover_data={"hover": True, "name": False})
+fig_cpu.update_traces(hovertemplate="%{customdata[0]}")
+st.plotly_chart(fig_cpu, use_container_width=True)
 
-# ===== Tab 2: Performance Graphs =====
-with tabs[1]:
-    if not PLOTLY_OK:
-        st.error("Plotly is not installed. Add `plotly` to your requirements.txt or run `pip install plotly` to see the charts.")
-    else:
-        left, right = st.columns(2)
+st.subheader("GPU Performance Spectrum")
+gpus["link"] = gpus["name"].apply(lambda x: lookup_links[x])
+gpus["hover"] = gpus.apply(lambda r: f"<a href='{r['link']}' target='_blank'>{r['name']}</a><br>Score: {r['score']}", axis=1)
 
-        # GPU scatter (horizontal), sorted by performance
-        with left:
-            st.subheader("GPU Performance Spectrum")
-            g_sorted = gpus.sort_values("avg_fps")
-            fig_gpu = px.scatter(
-                g_sorted,
-                x="avg_fps", y="name",
-                hover_data={"avg_fps": True, "name": True},
-                labels={"avg_fps": "Relative GPU performance (avg FPS)", "name": "GPU"},
-                title="All GPUs (higher is faster)",
-                height=800
-            )
-            # If games are selected, add requirement guide lines
-            if "selected_games" in locals() and selected_games:
-                reqs = {"ultra":0, "high":0, "medium":0}
-                for game in selected_games:
-                    for tier in reqs:
-                        reqs[tier] = max(reqs[tier], game_requirements[game][tier])
-                fig_gpu.add_vline(x=reqs["medium"], line_dash="dot", annotation_text="Medium req", annotation_position="top")
-                fig_gpu.add_vline(x=reqs["high"],   line_dash="dash", annotation_text="High req",   annotation_position="top")
-                fig_gpu.add_vline(x=reqs["ultra"],  line_dash=None,   annotation_text="Ultra req",  annotation_position="top")
-            st.plotly_chart(fig_gpu, use_container_width=True)
-            st.caption("Hover to see exact model. Vertical lines show the hardest requirement for the games you selected (if any).")
-
-        # CPU scatter (horizontal), sorted by PassMark
-        with right:
-            st.subheader("CPU Performance Spectrum (PassMark)")
-            c_sorted = cpus.sort_values("passmark_score")
-            fig_cpu = px.scatter(
-                c_sorted,
-                x="passmark_score", y="name",
-                hover_data={"passmark_score": True, "name": True},
-                labels={"passmark_score": "PassMark score (higher is faster)", "name": "CPU"},
-                title="All CPUs (higher is faster)",
-                height=800
-            )
-            # Guide lines for simple tiers
-            fig_cpu.add_vline(x=15000, line_dash="dot", annotation_text="~Medium tier", annotation_position="top")
-            fig_cpu.add_vline(x=25000, line_dash="dash", annotation_text="~High tier",   annotation_position="top")
-            fig_cpu.add_vline(x=40000, line_dash=None,   annotation_text="~Ultra tier",  annotation_position="top")
-            st.plotly_chart(fig_cpu, use_container_width=True)
-            st.caption("Guide lines mark rough tiers used in recommendations (~15k / 25k / 40k PassMark).")
+fig_gpu = px.scatter(gpus, x="name", y="score", title="GPU Scores", size="score", hover_name="name", hover_data={"hover": True, "name": False})
+fig_gpu.update_traces(hovertemplate="%{customdata[0]}")
+st.plotly_chart(fig_gpu, use_container_width=True)
