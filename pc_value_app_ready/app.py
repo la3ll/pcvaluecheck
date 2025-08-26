@@ -111,10 +111,25 @@ quality_multipliers = {"Low": 1, "Medium": 1.5, "High": 2, "Ultra": 3}
 # =======================
 st.title("PC Build Performance Explorer")
 
-st.sidebar.header("Choose Games and Quality")
-selected_games = st.sidebar.multiselect("Select Games:", list(games.keys()))
-selected_quality = st.sidebar.selectbox("Select Quality:", list(quality_multipliers.keys()))
+st.markdown("### CPU Performance Spectrum")
+fig_cpu = px.bar(
+    cpus.sort_values("PassMark"),
+    x="PassMark", y="name",
+    orientation="h",
+    title="CPU Performance (Higher is Better)",
+    hover_data={"link": True, "PassMark": True}
+)
+st.plotly_chart(fig_cpu, use_container_width=True)
 
+st.markdown("### GPU Performance Spectrum")
+fig_gpu = px.bar(
+    gpus.sort_values("score"),
+    x="score", y="name",
+    orientation="h",
+    title="GPU Performance (Higher is Better)",
+    hover_data={"link": True, "score": True}
+)
+st.plotly_chart(fig_gpu, use_container_width=True)
 # =======================
 # Recommendations
 # =======================
