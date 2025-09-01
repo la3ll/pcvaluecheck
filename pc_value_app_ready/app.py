@@ -104,11 +104,15 @@ cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", ax
 # ----------------------------
 st.title("PC Value Checker")
 
+# --- GAME FILTER ---
+games = ["1080p Benchmarks", "1440p Benchmarks", "4K Benchmarks"]  # extendable later
+selected_game = st.selectbox("Select Game/Benchmark:", games)
+
 # --- GPU Section ---
 st.subheader("GPU Performance")
 
 selected_gpus = st.multiselect(
-    "Filter GPUs:",
+    "Select GPUs:",
     options=gpu_df["name"].tolist(),
     default=gpu_df["name"].tolist()
 )
@@ -119,7 +123,7 @@ gpu_fig = px.bar(
     x="score",
     y="label",
     orientation="h",
-    title="GPU Benchmark (Higher is Better)",
+    title=f"GPU Performance - {selected_game}",
     hover_data=["score"]
 )
 gpu_fig.update_layout(yaxis=dict(categoryorder="total ascending"))
@@ -129,7 +133,7 @@ st.plotly_chart(gpu_fig, use_container_width=True)
 st.subheader("CPU Performance")
 
 selected_cpus = st.multiselect(
-    "Filter CPUs:",
+    "Select CPUs:",
     options=cpu_df["name"].tolist(),
     default=cpu_df["name"].tolist()
 )
@@ -140,7 +144,7 @@ cpu_fig = px.bar(
     x="score",
     y="label",
     orientation="h",
-    title="CPU Benchmark (Higher is Better)",
+    title=f"CPU Performance - {selected_game}",
     hover_data=["score"]
 )
 cpu_fig.update_layout(yaxis=dict(categoryorder="total ascending"))
