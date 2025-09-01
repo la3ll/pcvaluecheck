@@ -2,9 +2,41 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# =======================
-# Component Data
-# =======================
+# ----------------------------
+# GPU + CPU Data (with links)
+# ----------------------------
+
+gpu_data = [
+    ["NVIDIA RTX 5090", 214, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+5090"],
+    ["NVIDIA RTX 5080", 165, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+5080"],
+    ["NVIDIA RTX 4090", 189, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4090"],
+    ["AMD RX 7900 XTX", 156, "https://pcpartpicker.com/search/?q=AMD+RX+7900+XTX"],
+    ["NVIDIA RTX 5070 Ti", 151, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+5070+Ti"],
+    ["NVIDIA RTX 5070", 126, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+5070"],
+    ["AMD RX 7900 XT", 134, "https://pcpartpicker.com/search/?q=AMD+RX+7900+XT"],
+    ["AMD RX 7800 XT", 101, "https://pcpartpicker.com/search/?q=AMD+RX+7800+XT"],
+    ["NVIDIA RTX 4070 Ti", 128, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4070+Ti"],
+    ["NVIDIA RTX 4070", 104, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4070"],
+    ["NVIDIA RTX 4060 Ti", 78, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4060+Ti"],
+    ["NVIDIA RTX 4060", 72, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4060"],
+    ["NVIDIA RTX 3090 Ti", 97, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3090+Ti"],
+    ["NVIDIA RTX 3090", 87, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3090"],
+    ["NVIDIA RTX 3080 Ti", 85, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3080+Ti"],
+    ["NVIDIA RTX 3080", 84, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3080"],
+    ["NVIDIA RTX 3070 Ti", 68, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3070+Ti"],
+    ["NVIDIA RTX 3070", 62, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3070"],
+    ["NVIDIA RTX 3060 Ti", 68, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3060+Ti"],
+    ["NVIDIA RTX 3060", 52, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3060"],
+    ["AMD RX 7900 GRE", 112, "https://pcpartpicker.com/search/?q=AMD+RX+7900+GRE"],
+    ["AMD RX 7600 XT", 61, "https://pcpartpicker.com/search/?q=AMD+RX+7600+XT"],
+    ["AMD RX 7600", 60, "https://pcpartpicker.com/search/?q=AMD+RX+7600"],
+    ["AMD RX 6900 XT", 107, "https://pcpartpicker.com/search/?q=AMD+RX+6900+XT"],
+    ["AMD RX 6800 XT", 100, "https://pcpartpicker.com/search/?q=AMD+RX+6800+XT"],
+    ["AMD RX 6800", 92, "https://pcpartpicker.com/search/?q=AMD+RX+6800"],
+    ["AMD RX 6700 XT", 68, "https://pcpartpicker.com/search/?q=AMD+RX+6700+XT"],
+    ["AMD RX 6600 XT", 58, "https://pcpartpicker.com/search/?q=AMD+RX+6600+XT"],
+    ["AMD RX 6600", 49, "https://pcpartpicker.com/search/?q=AMD+RX+6600"]
+]
 
 cpu_data = [
     ["AMD Ryzen 9 9950X3D", 70102, "https://pcpartpicker.com/search/?q=AMD+Ryzen+9+9950X3D"],
@@ -55,124 +87,46 @@ cpu_data = [
     ["Intel Core i3-12100F", 13885, "https://pcpartpicker.com/search/?q=Intel+Core+i3-12100F"],
     ["Intel Core i3-12100", 9624, "https://pcpartpicker.com/search/?q=Intel+Core+i3-12100"],
     ["AMD Ryzen 3 3300X", 13471, "https://pcpartpicker.com/search/?q=AMD+Ryzen+3+3300X"],
-    ["AMD Ryzen 3 3100", 11211, "https://pcpartpicker.com/search/?q=AMD+Ryzen+3+3100"],
-]
-gpu_data = [
-    {"name": "NVIDIA RTX 5090 FE", "score": 214, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+5090"},
-    {"name": "NVIDIA RTX 4090 Cybertank", "score": 190, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4090"},
-    {"name": "NVIDIA RTX 5080 FE", "score": 165, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+5080"},
-    {"name": "Sapphire RX 7900 XTX Nitro", "score": 156, "link": "https://pcpartpicker.com/search/?q=AMD+RX+7900+XTX"},
-    {"name": "ASUS RTX 5070 Ti Prime", "score": 151, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+5070+Ti"},
-    {"name": "Sapphire RX 9070 XT Pulse", "score": 145, "link": "https://pcpartpicker.com/search/?q=AMD+RX+7900+XT"},
-    {"name": "PowerColor RX 7900 XT Hellhound", "score": 134, "link": "https://pcpartpicker.com/search/?q=AMD+RX+7900+XT"},
-    {"name": "Sapphire RX 9070 Pulse", "score": 134, "link": "https://pcpartpicker.com/search/?q=AMD+RX+7900+XT"},
-    {"name": "ASUS RTX 4070 Ti TUF", "score": 128, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4070+Ti"},
-    {"name": "NVIDIA RTX 5070 FE", "score": 126, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+5070"},
-    {"name": "Sapphire RX 7900 GRE Pulse", "score": 112, "link": "https://pcpartpicker.com/search/?q=AMD+RX+7900+GRE"},
-    {"name": "Sapphire RX 6950 XT Nitro", "score": 107, "link": "https://pcpartpicker.com/search/?q=AMD+RX+6950+XT"},
-    {"name": "NVIDIA RTX 4070 FE", "score": 104, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4070"},
-    {"name": "AMD RX 7800 XT Red", "score": 101, "link": "https://pcpartpicker.com/search/?q=AMD+RX+7800+XT"},
-    {"name": "EVGA RTX 3080 FTW3 Ultra", "score": 97, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3080"},
-    {"name": "PNY RTX 5060 Ti 16GB", "score": 93, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4060+Ti"},
-    {"name": "XFX RX 7700 XT Black", "score": 87, "link": "https://pcpartpicker.com/search/?q=AMD+RX+7700+XT"},
-    {"name": "Sapphire RX 9060 XT Pulse", "score": 86, "link": "https://pcpartpicker.com/search/?q=AMD+RX+6800+XT"},
-    {"name": "NVIDIA RTX 3070 Ti FE", "score": 84, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3070+Ti"},
-    {"name": "NVIDIA RTX 4060 Ti FE", "score": 78, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4060+Ti"},
-    {"name": "Colorful RTX 3070 Bilibili", "score": 77, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3070"},
-    {"name": "Gigabyte RTX 5060 Eagle OC", "score": 76, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4060"},
-    {"name": "EVGA RTX 3060 Ti FTW3", "score": 68, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3060+Ti"},
-    {"name": "XFX RX 6700 XT MERC Black", "score": 68, "link": "https://pcpartpicker.com/search/?q=AMD+RX+6700+XT"},
-    {"name": "ASUS RTX 4060 Dual", "score": 62, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+4060"},
-    {"name": "AMD RX 7600 Red", "score": 60, "link": "https://pcpartpicker.com/search/?q=AMD+RX+7600"},
-    {"name": "PowerColor RX 6600 XT Red Devil", "score": 58, "link": "https://pcpartpicker.com/search/?q=AMD+RX+6600+XT"},
-    {"name": "Intel Arc B580 FE", "score": 55, "link": "https://pcpartpicker.com/search/?q=Intel+Arc+B580"},
-    {"name": "EVGA RTX 2070 Super XC Ultra", "score": 53, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+2070+Super"},
-    {"name": "Acer Arc A770 BiForst", "score": 52, "link": "https://pcpartpicker.com/search/?q=Intel+Arc+A770"},
-    {"name": "EVGA RTX 3060 XC Black", "score": 52, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3060"},
-    {"name": "EVGA RTX 2070 Z", "score": 51, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+2070"},
-    {"name": "Sparkle Arc A750 Titan", "score": 49, "link": "https://pcpartpicker.com/search/?q=Intel+Arc+A750"},
-    {"name": "XFX RX 6600 CORE", "score": 49, "link": "https://pcpartpicker.com/search/?q=AMD+RX+6600"},
-    {"name": "EVGA RTX 2060 KO", "score": 40, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+2060"},
-    {"name": "EVGA RTX 3050 XC Black", "score": 38, "link": "https://pcpartpicker.com/search/?q=NVIDIA+RTX+3050"},
-    {"name": "EVGA GTX 1070 SC", "score": 31, "link": "https://pcpartpicker.com/search/?q=NVIDIA+GTX+1070"},
-    {"name": "EVGA GTX 1060 SSC", "score": 23, "link": "https://pcpartpicker.com/search/?q=NVIDIA+GTX+1060"},
+    ["AMD Ryzen 3 3100", 11211, "https://pcpartpicker.com/search/?q=AMD+Ryzen+3+3100"]
 ]
 
+# ----------------------------
 # Convert to DataFrames
-cpus = pd.DataFrame(cpu_data, columns=["name", "PassMark", "link"])
-gpus = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
+# ----------------------------
+gpu_df = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
+cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
 
-# =======================
-# Game Requirements
-# =======================
-games = {
-    "Cyberpunk 2077": {"cpu": 20000, "gpu": 30000},
-    "The Sims 4": {"cpu": 8000, "gpu": 6000},
-    "Elden Ring": {"cpu": 15000, "gpu": 25000},
-    "GTA V": {"cpu": 12000, "gpu": 15000},
-}
+# Add clickable names
+gpu_df["label"] = gpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", axis=1)
+cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", axis=1)
 
-quality_multipliers = {"Low": 1, "Medium": 1.5, "High": 2, "Ultra": 3}
-
-# =======================
+# ----------------------------
 # Streamlit App
-# =======================
-st.title("PC Build Performance Explorer")
+# ----------------------------
+st.title("PC Value Checker")
 
-st.sidebar.header("Choose Games and Quality")
-selected_games = st.sidebar.multiselect("Select Games:", list(games.keys()))
-selected_quality = st.sidebar.selectbox("Select Quality:", list(quality_multipliers.keys()))
-
-# =======================
-# Recommendations
-# =======================
-if selected_games:
-    st.subheader("Recommended Components")
-    for game in selected_games:
-        req = games[game]
-        multiplier = quality_multipliers[selected_quality]
-        cpu_min = req["cpu"] * multiplier
-        gpu_min = req["gpu"] * multiplier
-
-        cpu_cap = cpu_min * 1.5
-        gpu_cap = gpu_min * 1.5
-
-        recommended_cpus = cpus[(cpus["PassMark"] >= cpu_min) & (cpus["PassMark"] <= cpu_cap)].nsmallest(4, "PassMark")
-        recommended_gpus = gpus[(gpus["score"] >= gpu_min) & (gpus["score"] <= gpu_cap)].nsmallest(4, "score")
-
-        st.markdown(f"**{game} ({selected_quality})**")
-        st.write("CPUs:")
-        for _, row in recommended_cpus.iterrows():
-            st.markdown(f"- [{row['name']}]({row['link']}) ({row['PassMark']})")
-        st.write("GPUs:")
-        for _, row in recommended_gpus.iterrows():
-            st.markdown(f"- [{row['name']}]({row['link']}) ({row['score']})")
-
-# =======================
-# Performance Graphs
-# =======================
-# GPU graph
+# GPU Graph
+st.subheader("GPU Performance")
 gpu_fig = px.bar(
-    gpu_df.sort_values("score", ascending=False),
+    gpu_df.sort_values(by="score", ascending=False),
     x="score",
-    y="name",
+    y="label",
     orientation="h",
-    title="GPU Performance",
-    hover_data=["link"],
+    title="GPU Benchmark (Higher is Better)",
+    hover_data=["score"]
 )
-gpu_fig.update_layout(
-    yaxis=dict(categoryorder="total ascending")  # best GPUs at the top
-)
+gpu_fig.update_layout(yaxis=dict(categoryorder="total ascending"))
+st.plotly_chart(gpu_fig, use_container_width=True)
 
-# CPU graph
+# CPU Graph
+st.subheader("CPU Performance")
 cpu_fig = px.bar(
-    cpu_df.sort_values("score", ascending=False),
+    cpu_df.sort_values(by="score", ascending=False),
     x="score",
-    y="name",
+    y="label",
     orientation="h",
-    title="CPU Performance",
-    hover_data=["link"],
+    title="CPU Benchmark (Higher is Better)",
+    hover_data=["score"]
 )
-cpu_fig.update_layout(
-    yaxis=dict(categoryorder="total ascending")  # best CPUs at the top
-)
+cpu_fig.update_layout(yaxis=dict(categoryorder="total ascending"))
+st.plotly_chart(cpu_fig, use_container_width=True)
