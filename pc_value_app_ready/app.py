@@ -105,7 +105,7 @@ cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", ax
 st.title("PC Value Checker")
 
 # --- GAME FILTER ---
-games = ["1080p Benchmarks", "1440p Benchmarks", "4K Benchmarks"]
+games = ["1080p Benchmarks", "1440p Benchmarks",]
 selected_game = st.selectbox("Select Game/Benchmark:", games)
 
 # --- GPU Section ---
