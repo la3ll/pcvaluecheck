@@ -105,47 +105,43 @@ cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", ax
 st.title("PC Value Checker")
 
 # --- GAME FILTER ---
-games = ["1080p Benchmarks", "1440p Benchmarks", "4K Benchmarks"]  # extendable later
+games = ["1080p Benchmarks", "1440p Benchmarks", "4K Benchmarks"]
 selected_game = st.selectbox("Select Game/Benchmark:", games)
 
 # --- GPU Section ---
 st.subheader("GPU Performance")
 
-selected_gpus = st.multiselect(
-    "Select GPUs:",
-    options=gpu_df["name"].tolist(),
-    default=gpu_df["name"].tolist()
-)
-filtered_gpu_df = gpu_df[gpu_df["name"].isin(selected_gpus)]
+selected_gpu = st.selectbox("Highlight GPU:", gpu_df["name"].tolist())
+gpu_df["highlight"] = gpu_df["name"].apply(lambda x: "Selected" if x == selected_gpu else "Other")
 
 gpu_fig = px.bar(
-    filtered_gpu_df.sort_values(by="score", ascending=False),
+    gpu_df.sort_values(by="score", ascending=False),
     x="score",
     y="label",
+    color="highlight",
+    color_discrete_map={"Selected": "crimson", "Other": "lightgray"},
     orientation="h",
     title=f"GPU Performance - {selected_game}",
     hover_data=["score"]
 )
-gpu_fig.update_layout(yaxis=dict(categoryorder="total ascending"))
+gpu_fig.update_layout(yaxis=dict(categoryorder="total ascending"), showlegend=False)
 st.plotly_chart(gpu_fig, use_container_width=True)
 
 # --- CPU Section ---
 st.subheader("CPU Performance")
 
-selected_cpus = st.multiselect(
-    "Select CPUs:",
-    options=cpu_df["name"].tolist(),
-    default=cpu_df["name"].tolist()
-)
-filtered_cpu_df = cpu_df[cpu_df["name"].isin(selected_cpus)]
+selected_cpu = st.selectbox("Highlight CPU:", cpu_df["name"].tolist())
+cpu_df["highlight"] = cpu_df["name"].apply(lambda x: "Selected" if x == selected_cpu else "Other")
 
 cpu_fig = px.bar(
-    filtered_cpu_df.sort_values(by="score", ascending=False),
+    cpu_df.sort_values(by="score", ascending=False),
     x="score",
     y="label",
+    color="highlight",
+    color_discrete_map={"Selected": "crimson", "Other": "lightgray"},
     orientation="h",
     title=f"CPU Performance - {selected_game}",
     hover_data=["score"]
 )
-cpu_fig.update_layout(yaxis=dict(categoryorder="total ascending"))
+cpu_fig.update_layout(yaxis=dict(categoryorder="total ascending"), showlegend=False)
 st.plotly_chart(cpu_fig, use_container_width=True)
