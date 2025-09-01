@@ -5,7 +5,6 @@ import plotly.express as px
 # ----------------------------
 # GPU + CPU Data (with links)
 # ----------------------------
-
 gpu_data = [
     ["NVIDIA RTX 5090", 214, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+5090"],
     ["NVIDIA RTX 5080", 165, "https://pcpartpicker.com/search/?q=NVIDIA+RTX+5080"],
@@ -105,10 +104,18 @@ cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", ax
 # ----------------------------
 st.title("PC Value Checker")
 
-# GPU Graph
+# --- GPU Section ---
 st.subheader("GPU Performance")
+
+selected_gpus = st.multiselect(
+    "Filter GPUs:",
+    options=gpu_df["name"].tolist(),
+    default=gpu_df["name"].tolist()
+)
+filtered_gpu_df = gpu_df[gpu_df["name"].isin(selected_gpus)]
+
 gpu_fig = px.bar(
-    gpu_df.sort_values(by="score", ascending=False),
+    filtered_gpu_df.sort_values(by="score", ascending=False),
     x="score",
     y="label",
     orientation="h",
@@ -118,10 +125,18 @@ gpu_fig = px.bar(
 gpu_fig.update_layout(yaxis=dict(categoryorder="total ascending"))
 st.plotly_chart(gpu_fig, use_container_width=True)
 
-# CPU Graph
+# --- CPU Section ---
 st.subheader("CPU Performance")
+
+selected_cpus = st.multiselect(
+    "Filter CPUs:",
+    options=cpu_df["name"].tolist(),
+    default=cpu_df["name"].tolist()
+)
+filtered_cpu_df = cpu_df[cpu_df["name"].isin(selected_cpus)]
+
 cpu_fig = px.bar(
-    cpu_df.sort_values(by="score", ascending=False),
+    filtered_cpu_df.sort_values(by="score", ascending=False),
     x="score",
     y="label",
     orientation="h",
