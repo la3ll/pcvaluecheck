@@ -112,10 +112,70 @@ cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", ax
 # Streamlit App
 # ----------------------------
 st.title("PC Value Checker")
-
-# --- GAME FILTER ---
-games = ["1080p Benchmarks", "1440p Benchmarks",]
-selected_game = st.selectbox("Select Game/Benchmark:", games)
+#----------------------------
+# Game Requirements
+#----------------------------
+game_requirements = {
+    "Cyberpunk 2077": {
+        "ultra": {"gpu": 180, "cpu": 120},
+        "high": {"gpu": 140, "cpu": 100},
+        "medium": {"gpu": 100, "cpu": 70},
+        "low": {"gpu": 70, "cpu": 50},
+    },
+    "Fortnite": {
+        "ultra": {"gpu": 90, "cpu": 90},   # lowered from 120/90
+        "high": {"gpu": 70, "cpu": 65},     # lowered from 90/70
+        "medium": {"gpu": 45, "cpu": 45},   # lowered from 60/50
+        "low": {"gpu": 35, "cpu": 30},      # lowered from 40/30
+    },
+    "The Last of Us Part I": {
+        "ultra": {"gpu": 160, "cpu": 120},
+        "high": {"gpu": 130, "cpu": 100},
+        "medium": {"gpu": 100, "cpu": 75},
+        "low": {"gpu": 70, "cpu": 55},
+    },
+    "Resident Evil 4 Remake": {
+        "ultra": {"gpu": 150, "cpu": 110},
+        "high": {"gpu": 110, "cpu": 90},
+        "medium": {"gpu": 80, "cpu": 70},
+        "low": {"gpu": 55, "cpu": 50},
+    },
+    "Counter-Strike 2": {
+        "ultra": {"gpu": 60, "cpu": 75},   # CPU still key
+        "high": {"gpu": 45, "cpu": 65},
+        "medium": {"gpu": 35, "cpu": 45},
+        "low": {"gpu": 15, "cpu": 30},
+    },
+    "Sims 4": {
+        "ultra": {"gpu": 30, "cpu": 50},
+        "high": {"gpu": 25, "cpu": 40},
+        "medium": {"gpu": 18, "cpu": 25},
+        "low": {"gpu": 12, "cpu": 15},
+    },
+    "Minecraft": {
+        "ultra": {"gpu": 40, "cpu": 45},
+        "high": {"gpu": 30, "cpu": 35},
+        "medium": {"gpu": 20, "cpu": 18},
+        "low": {"gpu": 10, "cpu": 12},
+    },
+}
+def get_performance(game, gpu_score, cpu_score):
+    thresholds = game_requirements[game]
+    
+    def tier(score):
+        if score >= thresholds["ultra"]: return "Ultra"
+        elif score >= thresholds["high"]: return "High"
+        elif score >= thresholds["medium"]: return "Medium"
+        else: return "Low"
+    
+    gpu_tier = tier(gpu_score)
+    cpu_tier = tier(cpu_score)
+    
+    # Final performance = lowest of GPU or CPU tier
+    tiers = ["Low", "Medium", "High", "Ultra"]
+    final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers.index(t))
+    
+    return final_tier, gpu_tier, cpu_tier
 
 # --- GPU Section ---
 st.subheader("GPU Performance")
