@@ -114,6 +114,20 @@ cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", ax
 st.title("PC Value Checker")
 
 # ----------------------------
+# Game Selection
+# ----------------------------
+games = [
+    "Cyberpunk 2077",
+    "Fortnite",
+    "The Last of Us Part I",
+    "Resident Evil 4 Remake",
+    "Counter-Strike 2",
+    "Sims 4",
+    "Minecraft"
+]
+selected_game = st.selectbox("Select Game:", games)
+
+# ----------------------------
 # Game Requirements
 # ----------------------------
 game_requirements = {
