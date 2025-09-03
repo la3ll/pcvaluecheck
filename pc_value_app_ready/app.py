@@ -159,36 +159,32 @@ game_requirements = {
         "low": {"gpu": 10, "cpu": 12},
     },
 }
-def get_performance(game, gpu_score, cpu_score):
-    thresholds = game_requirements[game]
-    
-    def tier(score):
-        if score >= thresholds["ultra"]: return "Ultra"
-        elif score >= thresholds["high"]: return "High"
-        elif score >= thresholds["medium"]: return "Medium"
-        else: return "Low"
-    
-    gpu_tier = tier(gpu_score)
-    cpu_tier = tier(cpu_score)
-    
-    # Final performance = lowest of GPU or CPU tier
-    tiers = ["Low", "Medium", "High", "Ultra"]
-    final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers.index(t))
-    
-    return final_tier, gpu_tier, cpu_tier
-
 # --- GPU Section ---
 st.subheader("GPU Performance")
 
 selected_gpu = st.selectbox("Highlight GPU:", gpu_df["name"].tolist())
+gpu_score = gpu_df.loc[gpu_df["name"] == selected_gpu, "score"].values[0]
+gpu_tier, _, _ = get_performance(selected_game, gpu_score, 99999)  # CPU set high so only GPU tier matters
+
+# Map tier colors
+tier_colors = {
+    "Ultra": "limegreen",
+    "High": "dodgerblue",
+    "Medium": "orange",
+    "Low": "red",
+}
+
 gpu_df["highlight"] = gpu_df["name"].apply(lambda x: "Selected" if x == selected_gpu else "Other")
+gpu_df["color"] = gpu_df["highlight"].apply(
+    lambda h: tier_colors[gpu_tier] if h == "Selected" else "lightgray"
+)
 
 gpu_fig = px.bar(
     gpu_df.sort_values(by="score", ascending=False),
     x="score",
     y="label",
-    color="highlight",
-    color_discrete_map={"Selected": "crimson", "Other": "lightgray"},
+    color="color",
+    color_discrete_map="identity",
     orientation="h",
     title=f"GPU Performance - {selected_game}",
     hover_data=["score"]
@@ -200,14 +196,20 @@ st.plotly_chart(gpu_fig, use_container_width=True)
 st.subheader("CPU Performance")
 
 selected_cpu = st.selectbox("Highlight CPU:", cpu_df["name"].tolist())
+cpu_score = cpu_df.loc[cpu_df["name"] == selected_cpu, "score"].values[0]
+_, cpu_tier, _ = get_performance(selected_game, 99999, cpu_score)  # GPU set high so only CPU tier matters
+
 cpu_df["highlight"] = cpu_df["name"].apply(lambda x: "Selected" if x == selected_cpu else "Other")
+cpu_df["color"] = cpu_df["highlight"].apply(
+    lambda h: tier_colors[cpu_tier] if h == "Selected" else "lightgray"
+)
 
 cpu_fig = px.bar(
     cpu_df.sort_values(by="score", ascending=False),
     x="score",
     y="label",
-    color="highlight",
-    color_discrete_map={"Selected": "crimson", "Other": "lightgray"},
+    color="color",
+    color_discrete_map="identity",
     orientation="h",
     title=f"CPU Performance - {selected_game}",
     hover_data=["score"]
