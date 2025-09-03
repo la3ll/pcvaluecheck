@@ -164,7 +164,7 @@ st.subheader("GPU Performance")
 
 selected_gpu = st.selectbox("Highlight GPU:", gpu_df["name"].tolist())
 gpu_score = gpu_df.loc[gpu_df["name"] == selected_gpu, "score"].values[0]
-gpu_tier, _, _ = get_performance(selected_game, gpu_score, 99999)  # CPU set high so only GPU tier matters
+final_tier, gpu_tier, _ = get_performance(selected_game, gpu_score, 99999)  # CPU maxed
 
 # Map tier colors
 tier_colors = {
@@ -197,7 +197,7 @@ st.subheader("CPU Performance")
 
 selected_cpu = st.selectbox("Highlight CPU:", cpu_df["name"].tolist())
 cpu_score = cpu_df.loc[cpu_df["name"] == selected_cpu, "score"].values[0]
-_, cpu_tier, _ = get_performance(selected_game, 99999, cpu_score)  # GPU set high so only CPU tier matters
+final_tier, _, cpu_tier = get_performance(selected_game, 99999, cpu_score)  # GPU maxed
 
 cpu_df["highlight"] = cpu_df["name"].apply(lambda x: "Selected" if x == selected_cpu else "Other")
 cpu_df["color"] = cpu_df["highlight"].apply(
