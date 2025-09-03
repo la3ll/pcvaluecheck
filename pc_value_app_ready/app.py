@@ -159,6 +159,24 @@ game_requirements = {
         "low": {"gpu": 10, "cpu": 12},
     },
 }
+def get_performance(game, gpu_score, cpu_score):
+    thresholds = game_requirements[game]
+
+    def tier(score, reqs):
+        if score >= reqs["ultra"]: return "Ultra"
+        elif score >= reqs["high"]: return "High"
+        elif score >= reqs["medium"]: return "Medium"
+        else: return "Low"
+
+    gpu_tier = tier(gpu_score, thresholds)
+    cpu_tier = tier(cpu_score, thresholds)
+
+    # Final performance = lowest of GPU or CPU tier
+    tiers = ["Low", "Medium", "High", "Ultra"]
+    final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers.index(t))
+
+    return final_tier, gpu_tier, cpu_tier
+
 # --- GPU Section ---
 st.subheader("GPU Performance")
 
