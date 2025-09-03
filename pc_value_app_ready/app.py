@@ -112,9 +112,10 @@ cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", ax
 # Streamlit App
 # ----------------------------
 st.title("PC Value Checker")
-#----------------------------
+
+# ----------------------------
 # Game Requirements
-#----------------------------
+# ----------------------------
 game_requirements = {
     "Cyberpunk 2077": {
         "ultra": {"gpu": 180, "cpu": 120},
@@ -123,10 +124,10 @@ game_requirements = {
         "low": {"gpu": 70, "cpu": 50},
     },
     "Fortnite": {
-        "ultra": {"gpu": 90, "cpu": 90},   # lowered from 120/90
-        "high": {"gpu": 70, "cpu": 65},     # lowered from 90/70
-        "medium": {"gpu": 45, "cpu": 45},   # lowered from 60/50
-        "low": {"gpu": 35, "cpu": 30},      # lowered from 40/30
+        "ultra": {"gpu": 90, "cpu": 90},
+        "high": {"gpu": 70, "cpu": 65},
+        "medium": {"gpu": 45, "cpu": 45},
+        "low": {"gpu": 35, "cpu": 30},
     },
     "The Last of Us Part I": {
         "ultra": {"gpu": 160, "cpu": 120},
@@ -141,7 +142,7 @@ game_requirements = {
         "low": {"gpu": 55, "cpu": 50},
     },
     "Counter-Strike 2": {
-        "ultra": {"gpu": 60, "cpu": 75},   # CPU still key
+        "ultra": {"gpu": 60, "cpu": 75},
         "high": {"gpu": 45, "cpu": 65},
         "medium": {"gpu": 35, "cpu": 45},
         "low": {"gpu": 15, "cpu": 30},
@@ -159,6 +160,10 @@ game_requirements = {
         "low": {"gpu": 10, "cpu": 12},
     },
 }
+
+# ----------------------------
+# Performance Evaluation Function
+# ----------------------------
 def get_performance(game, gpu_score, cpu_score):
     thresholds = game_requirements[game]
 
@@ -177,7 +182,9 @@ def get_performance(game, gpu_score, cpu_score):
 
     return final_tier, gpu_tier, cpu_tier
 
-# --- GPU Section ---
+# ----------------------------
+# GPU Section
+# ----------------------------
 st.subheader("GPU Performance")
 
 selected_gpu = st.selectbox("Highlight GPU:", gpu_df["name"].tolist())
@@ -210,7 +217,9 @@ gpu_fig = px.bar(
 gpu_fig.update_layout(yaxis=dict(categoryorder="total ascending"), showlegend=False)
 st.plotly_chart(gpu_fig, use_container_width=True)
 
-# --- CPU Section ---
+# ----------------------------
+# CPU Section
+# ----------------------------
 st.subheader("CPU Performance")
 
 selected_cpu = st.selectbox("Highlight CPU:", cpu_df["name"].tolist())
