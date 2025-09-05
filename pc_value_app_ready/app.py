@@ -114,12 +114,6 @@ cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", ax
 st.title("PC Value Checker")
 
 # ----------------------------
-# Game Selection
-# ----------------------------
-games = list(game_requirements.keys())
-selected_game = st.selectbox("Select Game/Benchmark:", games)
-
-# ----------------------------
 # Game Requirements
 # ----------------------------
 game_requirements = {
@@ -166,6 +160,11 @@ game_requirements = {
         "low": {"gpu": 10, "cpu": 12},
     },
 }
+# ----------------------------
+# Game Selection
+# ----------------------------
+games = list(game_requirements.keys())
+selected_game = st.selectbox("Select Game/Benchmark:", games)
 
 # ----------------------------
 # Performance Logic
