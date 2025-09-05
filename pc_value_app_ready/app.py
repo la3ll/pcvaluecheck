@@ -219,61 +219,81 @@ st.success(f"Final predicted tier for **{selected_game}**: **{final_tier}**")
 
 
 # ----------------------------
-# CPU Graph: All parts, selected highlighted, proper position
+# CPU Graph with Game Requirements
 # ----------------------------
 cpu_sorted = cpu_df.sort_values("score").copy()
 cpu_sorted["Type"] = cpu_sorted["label"].apply(lambda x: "Your Part" if x == selected_cpu else "Other Parts")
 
-fig_cpu = px.bar(
-    cpu_sorted,
-    x="label",
-    y="score",
-    color="Type",
-    color_discrete_map={"Your Part": "dodgerblue", "Other Parts": "lightgray"},
-    title="CPU Benchmark Scores (Selected Highlighted)",
-    labels={"label": "CPU", "score": "Benchmark Score"},
-    text="score"
-)
+fig_cpu = go.Figure()
 
-# Outline selected CPU only (keeps position in sorted list)
-for trace in fig_cpu.data:
-    if trace.name == "Your Part":
-        trace.marker.line.color = "black"
-        trace.marker.line.width = 2
+# Add all CPU bars
+fig_cpu.add_trace(go.Bar(
+    x=cpu_sorted["label"],
+    y=cpu_sorted["score"],
+    marker_color=[ "dodgerblue" if x==selected_cpu else "lightgray" for x in cpu_sorted["label"]],
+    text=cpu_sorted["score"],
+    name="CPU Benchmark"
+))
+
+# Highlight selected CPU with black outline
+fig_cpu.update_traces(marker_line_color=["black" if x==selected_cpu else None for x in cpu_sorted["label"]],
+                      marker_line_width=[2 if x==selected_cpu else 0 for x in cpu_sorted["label"]])
+
+# Add horizontal lines for game requirements
+tiers = ["low", "medium", "high", "ultra"]
+colors = ["green", "yellow", "orange", "red"]
+for tier, color in zip(tiers, colors):
+    req_score = game_requirements[selected_game][tier]["cpu"]
+    fig_cpu.add_hline(y=req_score, line_dash="dash", line_color=color,
+                       annotation_text=f"{tier.capitalize()} Requirement",
+                       annotation_position="top left")
 
 fig_cpu.update_layout(
+    title=f"CPU Benchmark Scores with {selected_game} Requirements",
+    xaxis_title="CPU",
+    yaxis_title="Benchmark Score",
     xaxis_tickangle=-45,
-    height=400,
-    showlegend=True
+    height=450,
+    showlegend=False
 )
+
 st.plotly_chart(fig_cpu)
 
 # ----------------------------
-# GPU Graph: All parts, selected highlighted, proper position
+# GPU Graph with Game Requirements
 # ----------------------------
 gpu_sorted = gpu_df.sort_values("score").copy()
 gpu_sorted["Type"] = gpu_sorted["label"].apply(lambda x: "Your Part" if x == selected_gpu else "Other Parts")
 
-fig_gpu = px.bar(
-    gpu_sorted,
-    x="label",
-    y="score",
-    color="Type",
-    color_discrete_map={"Your Part": "dodgerblue", "Other Parts": "lightgray"},
-    title="GPU Benchmark Scores (Selected Highlighted)",
-    labels={"label": "GPU", "score": "Benchmark Score"},
-    text="score"
-)
+fig_gpu = go.Figure()
 
-# Outline selected GPU only (keeps position in sorted list)
-for trace in fig_gpu.data:
-    if trace.name == "Your Part":
-        trace.marker.line.color = "black"
-        trace.marker.line.width = 2
+# Add all GPU bars
+fig_gpu.add_trace(go.Bar(
+    x=gpu_sorted["label"],
+    y=gpu_sorted["score"],
+    marker_color=[ "dodgerblue" if x==selected_gpu else "lightgray" for x in gpu_sorted["label"]],
+    text=gpu_sorted["score"],
+    name="GPU Benchmark"
+))
+
+# Highlight selected GPU
+fig_gpu.update_traces(marker_line_color=["black" if x==selected_gpu else None for x in gpu_sorted["label"]],
+                      marker_line_width=[2 if x==selected_gpu else 0 for x in gpu_sorted["label"]])
+
+# Add horizontal lines for game requirements
+for tier, color in zip(tiers, colors):
+    req_score = game_requirements[selected_game][tier]["gpu"]
+    fig_gpu.add_hline(y=req_score, line_dash="dash", line_color=color,
+                       annotation_text=f"{tier.capitalize()} Requirement",
+                       annotation_position="top left")
 
 fig_gpu.update_layout(
+    title=f"GPU Benchmark Scores with {selected_game} Requirements",
+    xaxis_title="GPU",
+    yaxis_title="Benchmark Score",
     xaxis_tickangle=-45,
-    height=400,
-    showlegend=True
+    height=450,
+    showlegend=False
 )
+
 st.plotly_chart(fig_gpu)
