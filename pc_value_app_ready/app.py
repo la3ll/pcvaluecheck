@@ -97,9 +97,8 @@ cpu_data = [
     ["AMD Ryzen 3 3300X", 13471, "https://pcpartpicker.com/search/?q=AMD+Ryzen+3+3300X"],
     ["AMD Ryzen 3 3100", 11211, "https://pcpartpicker.com/search/?q=AMD+Ryzen+3+3100"]
 ]
-
 # ----------------------------
-# Convert to DataFrames (assume gpu_df and cpu_df already exist)
+# Convert to DataFrames
 # ----------------------------
 gpu_df = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
 cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
@@ -109,16 +108,11 @@ cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
 # ----------------------------
 st.title("PC Value Checker")
 
-# ----------------------------
-# Game Selection
-# ----------------------------
-# Assume game_requirements dict already exists
+# Game selection
 games = list(game_requirements.keys())
 selected_game = st.selectbox("Select Game/Benchmark:", games)
 
-# ----------------------------
-# CPU/GPU Selection
-# ----------------------------
+# CPU/GPU selection
 selected_gpu = st.selectbox("Select GPU:", gpu_df["name"])
 selected_cpu = st.selectbox("Select CPU:", cpu_df["name"])
 
