@@ -105,39 +105,47 @@ gpu_df = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
 cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
 
 # ----------------------------
-# Game Requirements (Modern + Older Titles)
-# ----------------------------
-game_requirements = {
-    "Cyberpunk 2077": {"cpu": {"low":5000,"medium":15000,"high":30000,"ultra":50000}, "gpu": {"low":50,"medium":100,"high":150,"ultra":200}},
-    "Elden Ring": {"cpu": {"low":3000,"medium":10000,"high":20000,"ultra":40000}, "gpu": {"low":40,"medium":80,"high":120,"ultra":180}},
-    "Forza Horizon 5": {"cpu": {"low":2500,"medium":9000,"high":18000,"ultra":35000}, "gpu": {"low":40,"medium":75,"high":120,"ultra":170}},
-    "Minecraft": {"cpu": {"low":2000,"medium":4000,"high":7000,"ultra":12000}, "gpu": {"low":20,"medium":40,"high":60,"ultra":80}},
-    "The Sims 4": {"cpu": {"low":1500,"medium":3000,"high":5000,"ultra":8000}, "gpu": {"low":15,"medium":30,"high":50,"ultra":70}},
-    "Counter-Strike 2": {"cpu": {"low":1000,"medium":2500,"high":4000,"ultra":6000}, "gpu": {"low":10,"medium":25,"high":40,"ultra":60}},
-    "GTA V": {"cpu": {"low":2000,"medium":5000,"high":10000,"ultra":20000}, "gpu": {"low":20,"medium":50,"high":90,"ultra":150}},
-}
-
-# ----------------------------
 # Streamlit App
 # ----------------------------
 st.title("PC Value Checker")
 
-# Game selection
+# ----------------------------
+# Game requirements
+# ----------------------------
+game_requirements = {
+    "Cyberpunk 2077": {"cpu": {"low":5000,"medium":15000,"high":30000,"ultra":50000}, 
+                        "gpu": {"low":50,"medium":100,"high":150,"ultra":200}},
+    "Elden Ring": {"cpu": {"low":3000,"medium":10000,"high":20000,"ultra":40000}, 
+                   "gpu": {"low":40,"medium":80,"high":120,"ultra":180}},
+    "Minecraft": {"cpu": {"low":1000,"medium":5000,"high":15000,"ultra":30000}, 
+                  "gpu": {"low":20,"medium":50,"high":80,"ultra":150}},
+    "Counter Strike 2": {"cpu": {"low":1000,"medium":5000,"high":15000,"ultra":25000}, 
+                         "gpu": {"low":20,"medium":50,"high":80,"ultra":120}},
+    "The Sims 4": {"cpu": {"low":1000,"medium":5000,"high":15000,"ultra":25000}, 
+                   "gpu": {"low":20,"medium":40,"high":60,"ultra":100}},
+    "Valorant": {"cpu": {"low":1000,"medium":3000,"high":8000,"ultra":15000}, 
+                 "gpu": {"low":15,"medium":30,"high":50,"ultra":80}},
+}
+
+# ----------------------------
+# Game Selection
+# ----------------------------
 games = list(game_requirements.keys())
 selected_game = st.selectbox("Select Game/Benchmark:", games)
 
-# CPU/GPU selection
+# ----------------------------
+# CPU/GPU Selection
+# ----------------------------
 selected_gpu = st.selectbox("Select GPU:", gpu_df["name"])
 selected_cpu = st.selectbox("Select CPU:", cpu_df["name"])
 
 # ----------------------------
-# GPU Tiering
+# Dynamic GPU Tiering
 # ----------------------------
 def get_gpu_tiers(gpu_scores):
     gpu_min = gpu_scores.min()
     gpu_max = gpu_scores.max()
     gpu_range = gpu_max - gpu_min
-    # Adjusted for realistic performance
     tiers = {
         "low": gpu_min + 0.1 * gpu_range,
         "medium": gpu_min + 0.3 * gpu_range,
@@ -150,12 +158,12 @@ def get_gpu_tiers(gpu_scores):
 # Performance Logic
 # ----------------------------
 def get_performance(game, gpu_score, cpu_score):
-    # CPU scaling 0–200
+    # CPU scaling: 0–200
     cpu_min = cpu_df["score"].min()
     cpu_max = cpu_df["score"].max()
     cpu_scaled = (cpu_score - cpu_min) / (cpu_max - cpu_min) * 200
 
-    # GPU tiers
+    # GPU tier
     gpu_tiers_scaled = get_gpu_tiers(gpu_df["score"])
     if gpu_score >= gpu_tiers_scaled["ultra"]:
         gpu_tier = "Ultra"
@@ -168,11 +176,16 @@ def get_performance(game, gpu_score, cpu_score):
 
     # CPU tier based on game
     thresholds = game_requirements[game]
+
     def tier(score, reqs, part):
-        if score >= reqs["ultra"][part]: return "Ultra"
-        elif score >= reqs["high"][part]: return "High"
-        elif score >= reqs["medium"][part]: return "Medium"
-        else: return "Low"
+        if score >= reqs[part]["ultra"]:
+            return "Ultra"
+        elif score >= reqs[part]["high"]:
+            return "High"
+        elif score >= reqs[part]["medium"]:
+            return "Medium"
+        else:
+            return "Low"
 
     cpu_tier = tier(cpu_scaled, thresholds, "cpu")
 
@@ -183,7 +196,7 @@ def get_performance(game, gpu_score, cpu_score):
     return final_tier, gpu_tier, cpu_tier, cpu_scaled
 
 # ----------------------------
-# Get scores for selected parts
+# Get selected component scores
 # ----------------------------
 gpu_score = gpu_df.loc[gpu_df["name"] == selected_gpu, "score"].values[0]
 cpu_score = cpu_df.loc[cpu_df["name"] == selected_cpu, "score"].values[0]
