@@ -98,11 +98,9 @@ cpu_data = [
     ["AMD Ryzen 3 3100", 11211, "https://pcpartpicker.com/search/?q=AMD+Ryzen+3+3100"]
 ]
 
-# Convert to DataFrames
 gpu_df = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
 cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
 
-# Add clickable labels
 gpu_df["label"] = gpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", axis=1)
 cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", axis=1)
 
@@ -168,7 +166,7 @@ selected_game = st.selectbox("Select Game:", games)
 selected_cpu = st.selectbox("Select CPU:", cpu_df["label"])
 selected_gpu = st.selectbox("Select GPU:", gpu_df["label"])
 
-# Extract raw scores
+# Now it's safe to extract scores
 cpu_score = cpu_df.loc[cpu_df["label"] == selected_cpu, "score"].values[0]
 gpu_score = gpu_df.loc[gpu_df["label"] == selected_gpu, "score"].values[0]
 
@@ -187,7 +185,6 @@ def get_performance(game, gpu_score, cpu_score):
     gpu_tier = tier(gpu_score, thresholds, "gpu")
     cpu_tier = tier(cpu_score, thresholds, "cpu")
 
-    # Bottleneck = lowest tier
     tiers = ["Low", "Medium", "High", "Ultra"]
     final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers.index(t))
 
