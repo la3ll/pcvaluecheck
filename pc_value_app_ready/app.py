@@ -219,7 +219,7 @@ st.success(f"Final predicted tier for **{selected_game}**: **{final_tier}**")
 
 
 # ----------------------------
-# CPU Graph: All parts, selected highlighted
+# CPU Graph: All parts, selected highlighted, proper position
 # ----------------------------
 cpu_sorted = cpu_df.sort_values("score").copy()
 cpu_sorted["Type"] = cpu_sorted["label"].apply(lambda x: "Your Part" if x == selected_cpu else "Other Parts")
@@ -235,7 +235,7 @@ fig_cpu = px.bar(
     text="score"
 )
 
-# Highlight the selected CPU
+# Outline selected CPU only (keeps position in sorted list)
 for trace in fig_cpu.data:
     if trace.name == "Your Part":
         trace.marker.line.color = "black"
@@ -249,7 +249,7 @@ fig_cpu.update_layout(
 st.plotly_chart(fig_cpu)
 
 # ----------------------------
-# GPU Graph: All parts, selected highlighted
+# GPU Graph: All parts, selected highlighted, proper position
 # ----------------------------
 gpu_sorted = gpu_df.sort_values("score").copy()
 gpu_sorted["Type"] = gpu_sorted["label"].apply(lambda x: "Your Part" if x == selected_gpu else "Other Parts")
@@ -265,7 +265,7 @@ fig_gpu = px.bar(
     text="score"
 )
 
-# Highlight the selected GPU
+# Outline selected GPU only (keeps position in sorted list)
 for trace in fig_gpu.data:
     if trace.name == "Your Part":
         trace.marker.line.color = "black"
