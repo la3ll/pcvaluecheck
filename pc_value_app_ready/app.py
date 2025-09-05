@@ -98,11 +98,15 @@ cpu_data = [
     ["AMD Ryzen 3 3100", 11211, "https://pcpartpicker.com/search/?q=AMD+Ryzen+3+3100"]
 ]
 
+# ----------------------------
+# Convert to DataFrames
+# ----------------------------
 gpu_df = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
 cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
 
-gpu_df["label"] = gpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", axis=1)
-cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", axis=1)
+# Keep names clean for dropdowns
+gpu_df["label"] = gpu_df["name"]
+cpu_df["label"] = cpu_df["name"]
 
 # ----------------------------
 # Streamlit App
@@ -160,15 +164,22 @@ game_requirements = {
 # ----------------------------
 # User Selections
 # ----------------------------
-games = list(game_requirements.keys())
-selected_game = st.selectbox("Select Game:", games)
-
+selected_game = st.selectbox("Select Game:", list(game_requirements.keys()))
 selected_cpu = st.selectbox("Select CPU:", cpu_df["label"])
 selected_gpu = st.selectbox("Select GPU:", gpu_df["label"])
 
-# Now it's safe to extract scores
+# ----------------------------
+# Fetch scores and links
+# ----------------------------
 cpu_score = cpu_df.loc[cpu_df["label"] == selected_cpu, "score"].values[0]
 gpu_score = gpu_df.loc[gpu_df["label"] == selected_gpu, "score"].values[0]
+
+cpu_link = cpu_df.loc[cpu_df["label"] == selected_cpu, "link"].values[0]
+gpu_link = gpu_df.loc[gpu_df["label"] == selected_gpu, "link"].values[0]
+
+# Display clickable links
+st.markdown(f"🔗 [CPU Link]({cpu_link})")
+st.markdown(f"🔗 [GPU Link]({gpu_link})")
 
 # ----------------------------
 # Performance Logic
@@ -207,7 +218,7 @@ st.subheader("🎨 Expected Graphics Quality")
 st.success(f"Final predicted tier for **{selected_game}**: **{final_tier}**")
 
 # ----------------------------
-# Visualization: Your parts vs requirements
+# Visualization: Your parts vs requirements (High)
 # ----------------------------
 thresholds = game_requirements[selected_game]
 
