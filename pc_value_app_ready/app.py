@@ -101,8 +101,8 @@ cpu_data = [
 # ----------------------------
 # Convert to DataFrames (assume gpu_df and cpu_df already exist)
 # ----------------------------
-# gpu_df = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
-# cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
+gpu_df = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
+cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
 
 # ----------------------------
 # Streamlit App
@@ -147,8 +147,22 @@ def get_performance(game, gpu_score, cpu_score):
     cpu_max = cpu_df["score"].max()
     cpu_scaled = (cpu_score - cpu_min) / (cpu_max - cpu_min) * 200
 
-    # GPU dynamic tiers
-    gpu_tiers_scaled = get_gpu_tiers(gpu_df["score"])
+  # ----------------------------
+# Dynamic GPU Tiering (Adjusted)
+# ----------------------------
+def get_gpu_tiers(gpu_scores):
+    gpu_min = gpu_scores.min()
+    gpu_max = gpu_scores.max()
+    gpu_range = gpu_max - gpu_min
+
+    # Adjusted tiers for more realistic performance
+    tiers = {
+        "low": gpu_min + 0.1 * gpu_range,
+        "medium": gpu_min + 0.3 * gpu_range,
+        "high": gpu_min + 0.55 * gpu_range,
+        "ultra": gpu_max
+    }
+    return tiers
 
     # Determine GPU tier
     if gpu_score >= gpu_tiers_scaled["ultra"]:
