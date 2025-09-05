@@ -218,35 +218,53 @@ st.subheader("🎨 Expected Graphics Quality")
 st.success(f"Final predicted tier for **{selected_game}**: **{final_tier}**")
 
 
+import plotly.graph_objects as go
+
 # ----------------------------
-# CPU Graph with Game Requirements
+# Prepare CPU data
 # ----------------------------
 cpu_sorted = cpu_df.sort_values("score").copy()
-cpu_sorted["Type"] = cpu_sorted["label"].apply(lambda x: "Your Part" if x == selected_cpu else "Other Parts")
+cpu_other = cpu_sorted[cpu_sorted["label"] != selected_cpu]
+cpu_selected = cpu_sorted[cpu_sorted["label"] == selected_cpu]
 
+# ----------------------------
+# CPU Chart
+# ----------------------------
 fig_cpu = go.Figure()
 
-# Add all CPU bars
+# Other CPUs
 fig_cpu.add_trace(go.Bar(
-    x=cpu_sorted["label"],
-    y=cpu_sorted["score"],
-    marker_color=[ "dodgerblue" if x==selected_cpu else "lightgray" for x in cpu_sorted["label"]],
-    text=cpu_sorted["score"],
-    name="CPU Benchmark"
+    x=cpu_other["label"],
+    y=cpu_other["score"],
+    marker_color="lightgray",
+    text=cpu_other["score"],
+    name="Other CPUs"
 ))
 
-# Highlight selected CPU with black outline
-fig_cpu.update_traces(marker_line_color=["black" if x==selected_cpu else None for x in cpu_sorted["label"]],
-                      marker_line_width=[2 if x==selected_cpu else 0 for x in cpu_sorted["label"]])
+# Selected CPU
+fig_cpu.add_trace(go.Bar(
+    x=cpu_selected["label"],
+    y=cpu_selected["score"],
+    marker_color="dodgerblue",
+    marker_line_color="black",
+    marker_line_width=2,
+    text=cpu_selected["score"],
+    name="Your CPU"
+))
 
 # Add horizontal lines for game requirements
 tiers = ["low", "medium", "high", "ultra"]
 colors = ["green", "yellow", "orange", "red"]
+
 for tier, color in zip(tiers, colors):
     req_score = game_requirements[selected_game][tier]["cpu"]
-    fig_cpu.add_hline(y=req_score, line_dash="dash", line_color=color,
-                       annotation_text=f"{tier.capitalize()} Requirement",
-                       annotation_position="top left")
+    fig_cpu.add_hline(
+        y=req_score,
+        line_dash="dash",
+        line_color=color,
+        annotation_text=f"{tier.capitalize()} Requirement",
+        annotation_position="top left"
+    )
 
 fig_cpu.update_layout(
     title=f"CPU Benchmark Scores with {selected_game} Requirements",
@@ -254,38 +272,53 @@ fig_cpu.update_layout(
     yaxis_title="Benchmark Score",
     xaxis_tickangle=-45,
     height=450,
-    showlegend=False
+    showlegend=True
 )
 
 st.plotly_chart(fig_cpu)
 
 # ----------------------------
-# GPU Graph with Game Requirements
+# Prepare GPU data
 # ----------------------------
 gpu_sorted = gpu_df.sort_values("score").copy()
-gpu_sorted["Type"] = gpu_sorted["label"].apply(lambda x: "Your Part" if x == selected_gpu else "Other Parts")
+gpu_other = gpu_sorted[gpu_sorted["label"] != selected_gpu]
+gpu_selected = gpu_sorted[gpu_sorted["label"] == selected_gpu]
 
+# ----------------------------
+# GPU Chart
+# ----------------------------
 fig_gpu = go.Figure()
 
-# Add all GPU bars
+# Other GPUs
 fig_gpu.add_trace(go.Bar(
-    x=gpu_sorted["label"],
-    y=gpu_sorted["score"],
-    marker_color=[ "dodgerblue" if x==selected_gpu else "lightgray" for x in gpu_sorted["label"]],
-    text=gpu_sorted["score"],
-    name="GPU Benchmark"
+    x=gpu_other["label"],
+    y=gpu_other["score"],
+    marker_color="lightgray",
+    text=gpu_other["score"],
+    name="Other GPUs"
 ))
 
-# Highlight selected GPU
-fig_gpu.update_traces(marker_line_color=["black" if x==selected_gpu else None for x in gpu_sorted["label"]],
-                      marker_line_width=[2 if x==selected_gpu else 0 for x in gpu_sorted["label"]])
+# Selected GPU
+fig_gpu.add_trace(go.Bar(
+    x=gpu_selected["label"],
+    y=gpu_selected["score"],
+    marker_color="dodgerblue",
+    marker_line_color="black",
+    marker_line_width=2,
+    text=gpu_selected["score"],
+    name="Your GPU"
+))
 
 # Add horizontal lines for game requirements
 for tier, color in zip(tiers, colors):
     req_score = game_requirements[selected_game][tier]["gpu"]
-    fig_gpu.add_hline(y=req_score, line_dash="dash", line_color=color,
-                       annotation_text=f"{tier.capitalize()} Requirement",
-                       annotation_position="top left")
+    fig_gpu.add_hline(
+        y=req_score,
+        line_dash="dash",
+        line_color=color,
+        annotation_text=f"{tier.capitalize()} Requirement",
+        annotation_position="top left"
+    )
 
 fig_gpu.update_layout(
     title=f"GPU Benchmark Scores with {selected_game} Requirements",
@@ -293,7 +326,7 @@ fig_gpu.update_layout(
     yaxis_title="Benchmark Score",
     xaxis_tickangle=-45,
     height=450,
-    showlegend=False
+    showlegend=True
 )
 
 st.plotly_chart(fig_gpu)
