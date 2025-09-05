@@ -217,48 +217,63 @@ st.write(f"GPU Tier: **{gpu_tier}**")
 st.subheader("🎨 Expected Graphics Quality")
 st.success(f"Final predicted tier for **{selected_game}**: **{final_tier}**")
 
+
 # ----------------------------
-# Visualization: All Components with Selected Highlight
+# CPU Graph: All parts, selected highlighted
 # ----------------------------
+cpu_sorted = cpu_df.sort_values("score").copy()
+cpu_sorted["Type"] = cpu_sorted["label"].apply(lambda x: "Your Part" if x == selected_cpu else "Other Parts")
 
-# Prepare data for CPU
-cpu_plot_df = cpu_df.copy()
-cpu_plot_df["Type"] = cpu_plot_df["label"].apply(lambda x: "Your Part" if x == selected_cpu else "Other Parts")
-cpu_plot_df["Component"] = "CPU"
-
-# Prepare data for GPU
-gpu_plot_df = gpu_df.copy()
-gpu_plot_df["Type"] = gpu_plot_df["label"].apply(lambda x: "Your Part" if x == selected_gpu else "Other Parts")
-gpu_plot_df["Component"] = "GPU"
-
-# Combine both
-plot_df = pd.concat([cpu_plot_df, gpu_plot_df], ignore_index=True)
-
-# Plot
-fig = px.bar(
-    plot_df,
+fig_cpu = px.bar(
+    cpu_sorted,
     x="label",
     y="score",
     color="Type",
-    facet_col="Component",
     color_discrete_map={"Your Part": "dodgerblue", "Other Parts": "lightgray"},
-    title=f"All Component Benchmark Scores with Selected Part Highlighted",
-    labels={"label": "Component Name", "score": "Benchmark Score"},
+    title="CPU Benchmark Scores (Selected Highlighted)",
+    labels={"label": "CPU", "score": "Benchmark Score"},
     text="score"
 )
 
-# Highlight selected part with border
-for trace in fig.data:
+# Highlight the selected CPU
+for trace in fig_cpu.data:
     if trace.name == "Your Part":
         trace.marker.line.color = "black"
         trace.marker.line.width = 2
 
-fig.update_layout(
-    showlegend=True,
-    height=500,
+fig_cpu.update_layout(
     xaxis_tickangle=-45,
-    xaxis_title="",
-    yaxis_title="Benchmark Score"
+    height=400,
+    showlegend=True
+)
+st.plotly_chart(fig_cpu)
+
+# ----------------------------
+# GPU Graph: All parts, selected highlighted
+# ----------------------------
+gpu_sorted = gpu_df.sort_values("score").copy()
+gpu_sorted["Type"] = gpu_sorted["label"].apply(lambda x: "Your Part" if x == selected_gpu else "Other Parts")
+
+fig_gpu = px.bar(
+    gpu_sorted,
+    x="label",
+    y="score",
+    color="Type",
+    color_discrete_map={"Your Part": "dodgerblue", "Other Parts": "lightgray"},
+    title="GPU Benchmark Scores (Selected Highlighted)",
+    labels={"label": "GPU", "score": "Benchmark Score"},
+    text="score"
 )
 
-st.plotly_chart(fig)
+# Highlight the selected GPU
+for trace in fig_gpu.data:
+    if trace.name == "Your Part":
+        trace.marker.line.color = "black"
+        trace.marker.line.width = 2
+
+fig_gpu.update_layout(
+    xaxis_tickangle=-45,
+    height=400,
+    showlegend=True
+)
+st.plotly_chart(fig_gpu)
