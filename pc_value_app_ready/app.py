@@ -218,58 +218,47 @@ st.subheader("🎨 Expected Graphics Quality")
 st.success(f"Final predicted tier for **{selected_game}**: **{final_tier}**")
 
 # ----------------------------
-# Visualization: CPU/GPU vs Game Requirements (All tiers) with highlights
+# Visualization: All Components with Selected Highlight
 # ----------------------------
-tiers = ["Low", "Medium", "High", "Ultra"]
 
-plot_data = []
-for part, score in [("CPU", cpu_score), ("GPU", gpu_score)]:
-    for tier_name in tiers:
-        req_score = game_requirements[selected_game][tier_name.lower()][part.lower()]
-        plot_data.append({
-            "Component": part,
-            "Tier": tier_name,
-            "Type": "Required",
-            "Score": req_score
-        })
-        plot_data.append({
-            "Component": part,
-            "Tier": tier_name,
-            "Type": "Your Part",
-            "Score": score
-        })
+# Prepare data for CPU
+cpu_plot_df = cpu_df.copy()
+cpu_plot_df["Type"] = cpu_plot_df["label"].apply(lambda x: "Your Part" if x == selected_cpu else "Other Parts")
+cpu_plot_df["Component"] = "CPU"
 
-chart_df = pd.DataFrame(plot_data)
+# Prepare data for GPU
+gpu_plot_df = gpu_df.copy()
+gpu_plot_df["Type"] = gpu_plot_df["label"].apply(lambda x: "Your Part" if x == selected_gpu else "Other Parts")
+gpu_plot_df["Component"] = "GPU"
 
-# Set colors and opacity
-color_map = {"Required": "lightgray", "Your Part": "dodgerblue"}
-opacity_map = {"Required": 0.5, "Your Part": 1.0}
+# Combine both
+plot_df = pd.concat([cpu_plot_df, gpu_plot_df], ignore_index=True)
 
+# Plot
 fig = px.bar(
-    chart_df,
-    x="Tier",
-    y="Score",
+    plot_df,
+    x="label",
+    y="score",
     color="Type",
-    barmode="group",
     facet_col="Component",
-    text="Score",
-    color_discrete_map=color_map,
-    title=f"{selected_game}: CPU & GPU vs All Tier Requirements"
+    color_discrete_map={"Your Part": "dodgerblue", "Other Parts": "lightgray"},
+    title=f"All Component Benchmark Scores with Selected Part Highlighted",
+    labels={"label": "Component Name", "score": "Benchmark Score"},
+    text="score"
 )
 
-# Update traces to set opacity per type
-for i, trace in enumerate(fig.data):
-    trace.opacity = opacity_map[trace.name]
+# Highlight selected part with border
+for trace in fig.data:
     if trace.name == "Your Part":
         trace.marker.line.color = "black"
         trace.marker.line.width = 2
 
 fig.update_layout(
     showlegend=True,
-    height=450,
-    xaxis_title="Performance Tier",
-    yaxis_title="Score",
-    legend_title_text="Type"
+    height=500,
+    xaxis_tickangle=-45,
+    xaxis_title="",
+    yaxis_title="Benchmark Score"
 )
 
 st.plotly_chart(fig)
