@@ -218,20 +218,58 @@ st.subheader("🎨 Expected Graphics Quality")
 st.success(f"Final predicted tier for **{selected_game}**: **{final_tier}**")
 
 # ----------------------------
-# Visualization: Your parts vs requirements (High)
+# Visualization: CPU/GPU vs Game Requirements (All tiers) with highlights
 # ----------------------------
-thresholds = game_requirements[selected_game]
+tiers = ["Low", "Medium", "High", "Ultra"]
 
-chart_df = pd.DataFrame({
-    "Component": ["CPU", "CPU", "GPU", "GPU"],
-    "Type": ["Your Part", "Required (High)", "Your Part", "Required (High)"],
-    "Score": [
-        cpu_score, thresholds["high"]["cpu"],
-        gpu_score, thresholds["high"]["gpu"],
-    ]
-})
+plot_data = []
+for part, score in [("CPU", cpu_score), ("GPU", gpu_score)]:
+    for tier_name in tiers:
+        req_score = game_requirements[selected_game][tier_name.lower()][part.lower()]
+        plot_data.append({
+            "Component": part,
+            "Tier": tier_name,
+            "Type": "Required",
+            "Score": req_score
+        })
+        plot_data.append({
+            "Component": part,
+            "Tier": tier_name,
+            "Type": "Your Part",
+            "Score": score
+        })
 
-fig = px.bar(chart_df, x="Component", y="Score", color="Type",
-             barmode="group", text="Score",
-             title=f"Your Hardware vs {selected_game} (High settings)")
+chart_df = pd.DataFrame(plot_data)
+
+# Set colors and opacity
+color_map = {"Required": "lightgray", "Your Part": "dodgerblue"}
+opacity_map = {"Required": 0.5, "Your Part": 1.0}
+
+fig = px.bar(
+    chart_df,
+    x="Tier",
+    y="Score",
+    color="Type",
+    barmode="group",
+    facet_col="Component",
+    text="Score",
+    color_discrete_map=color_map,
+    title=f"{selected_game}: CPU & GPU vs All Tier Requirements"
+)
+
+# Update traces to set opacity per type
+for i, trace in enumerate(fig.data):
+    trace.opacity = opacity_map[trace.name]
+    if trace.name == "Your Part":
+        trace.marker.line.color = "black"
+        trace.marker.line.width = 2
+
+fig.update_layout(
+    showlegend=True,
+    height=450,
+    xaxis_title="Performance Tier",
+    yaxis_title="Score",
+    legend_title_text="Type"
+)
+
 st.plotly_chart(fig)
