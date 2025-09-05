@@ -100,8 +100,22 @@ cpu_data = [
 # ----------------------------
 # Convert to DataFrames
 # ----------------------------
+
 gpu_df = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
 cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
+
+# ----------------------------
+# Game Requirements (Modern + Older Titles)
+# ----------------------------
+game_requirements = {
+    "Cyberpunk 2077": {"cpu": {"low":5000,"medium":15000,"high":30000,"ultra":50000}, "gpu": {"low":50,"medium":100,"high":150,"ultra":200}},
+    "Elden Ring": {"cpu": {"low":3000,"medium":10000,"high":20000,"ultra":40000}, "gpu": {"low":40,"medium":80,"high":120,"ultra":180}},
+    "Forza Horizon 5": {"cpu": {"low":2500,"medium":9000,"high":18000,"ultra":35000}, "gpu": {"low":40,"medium":75,"high":120,"ultra":170}},
+    "Minecraft": {"cpu": {"low":2000,"medium":4000,"high":7000,"ultra":12000}, "gpu": {"low":20,"medium":40,"high":60,"ultra":80}},
+    "The Sims 4": {"cpu": {"low":1500,"medium":3000,"high":5000,"ultra":8000}, "gpu": {"low":15,"medium":30,"high":50,"ultra":70}},
+    "Counter-Strike 2": {"cpu": {"low":1000,"medium":2500,"high":4000,"ultra":6000}, "gpu": {"low":10,"medium":25,"high":40,"ultra":60}},
+    "GTA V": {"cpu": {"low":2000,"medium":5000,"high":10000,"ultra":20000}, "gpu": {"low":20,"medium":50,"high":90,"ultra":150}},
+}
 
 # ----------------------------
 # Streamlit App
@@ -117,39 +131,13 @@ selected_gpu = st.selectbox("Select GPU:", gpu_df["name"])
 selected_cpu = st.selectbox("Select CPU:", cpu_df["name"])
 
 # ----------------------------
-# Dynamic GPU Tiering
+# GPU Tiering
 # ----------------------------
 def get_gpu_tiers(gpu_scores):
     gpu_min = gpu_scores.min()
     gpu_max = gpu_scores.max()
     gpu_range = gpu_max - gpu_min
-
-    tiers = {
-        "low": gpu_min + 0.2 * gpu_range,
-        "medium": gpu_min + 0.4 * gpu_range,
-        "high": gpu_min + 0.7 * gpu_range,
-        "ultra": gpu_max
-    }
-    return tiers
-
-# ----------------------------
-# Performance Logic
-# ----------------------------
-def get_performance(game, gpu_score, cpu_score):
-    # CPU scaling: 0–200
-    cpu_min = cpu_df["score"].min()
-    cpu_max = cpu_df["score"].max()
-    cpu_scaled = (cpu_score - cpu_min) / (cpu_max - cpu_min) * 200
-
-  # ----------------------------
-# Dynamic GPU Tiering (Adjusted)
-# ----------------------------
-def get_gpu_tiers(gpu_scores):
-    gpu_min = gpu_scores.min()
-    gpu_max = gpu_scores.max()
-    gpu_range = gpu_max - gpu_min
-
-    # Adjusted tiers for more realistic performance
+    # Adjusted for realistic performance
     tiers = {
         "low": gpu_min + 0.1 * gpu_range,
         "medium": gpu_min + 0.3 * gpu_range,
@@ -158,7 +146,17 @@ def get_gpu_tiers(gpu_scores):
     }
     return tiers
 
-    # Determine GPU tier
+# ----------------------------
+# Performance Logic
+# ----------------------------
+def get_performance(game, gpu_score, cpu_score):
+    # CPU scaling 0–200
+    cpu_min = cpu_df["score"].min()
+    cpu_max = cpu_df["score"].max()
+    cpu_scaled = (cpu_score - cpu_min) / (cpu_max - cpu_min) * 200
+
+    # GPU tiers
+    gpu_tiers_scaled = get_gpu_tiers(gpu_df["score"])
     if gpu_score >= gpu_tiers_scaled["ultra"]:
         gpu_tier = "Ultra"
     elif gpu_score >= gpu_tiers_scaled["high"]:
@@ -168,7 +166,7 @@ def get_gpu_tiers(gpu_scores):
     else:
         gpu_tier = "Low"
 
-    # Determine CPU tier based on game thresholds
+    # CPU tier based on game
     thresholds = game_requirements[game]
     def tier(score, reqs, part):
         if score >= reqs["ultra"][part]: return "Ultra"
@@ -185,7 +183,7 @@ def get_gpu_tiers(gpu_scores):
     return final_tier, gpu_tier, cpu_tier, cpu_scaled
 
 # ----------------------------
-# Get selected component scores
+# Get scores for selected parts
 # ----------------------------
 gpu_score = gpu_df.loc[gpu_df["name"] == selected_gpu, "score"].values[0]
 cpu_score = cpu_df.loc[cpu_df["name"] == selected_cpu, "score"].values[0]
@@ -212,13 +210,11 @@ fig_gpu = px.bar(
     labels={"score": "GPU Score", "name": "GPU"},
     title="GPU Benchmark Comparison"
 )
-
 fig_gpu.update_traces(
     marker_color=["orange" if x==selected_gpu else "lightblue" for x in gpu_sorted["name"]],
     marker_line_color=["black" if x==selected_gpu else None for x in gpu_sorted["name"]],
     marker_line_width=[2 if x==selected_gpu else 0 for x in gpu_sorted["name"]],
 )
-
 st.plotly_chart(fig_gpu, use_container_width=True)
 
 # ----------------------------
@@ -234,11 +230,9 @@ fig_cpu = px.bar(
     labels={"score": "CPU Score", "name": "CPU"},
     title="CPU Benchmark Comparison"
 )
-
 fig_cpu.update_traces(
     marker_color=["orange" if x==selected_cpu else "lightblue" for x in cpu_sorted["name"]],
     marker_line_color=["black" if x==selected_cpu else None for x in cpu_sorted["name"]],
     marker_line_width=[2 if x==selected_cpu else 0 for x in cpu_sorted["name"]],
 )
-
 st.plotly_chart(fig_cpu, use_container_width=True)
