@@ -98,20 +98,18 @@ cpu_data = [
     ["AMD Ryzen 3 3100", 11211, "https://pcpartpicker.com/search/?q=AMD+Ryzen+3+3100"]
 ]
 
-# ----------------------------
 # Convert to DataFrames
-# ----------------------------
 gpu_df = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
 cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
 
-# Add clickable names
+# Add clickable labels
 gpu_df["label"] = gpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", axis=1)
 cpu_df["label"] = cpu_df.apply(lambda row: f"[{row['name']}]({row['link']})", axis=1)
 
 # ----------------------------
 # Streamlit App
 # ----------------------------
-st.title("PC Value Checker")
+st.title("🎮 PC Value & Game Performance Checker")
 
 # ----------------------------
 # Game Requirements
@@ -160,11 +158,19 @@ game_requirements = {
         "low": {"gpu": 10, "cpu": 12},
     },
 }
+
 # ----------------------------
-# Game Selection
+# User Selections
 # ----------------------------
 games = list(game_requirements.keys())
-selected_game = st.selectbox("Select Game/Benchmark:", games)
+selected_game = st.selectbox("Select Game:", games)
+
+selected_cpu = st.selectbox("Select CPU:", cpu_df["label"])
+selected_gpu = st.selectbox("Select GPU:", gpu_df["label"])
+
+# Extract raw scores
+cpu_score = cpu_df.loc[cpu_df["label"] == selected_cpu, "score"].values[0]
+gpu_score = gpu_df.loc[gpu_df["label"] == selected_gpu, "score"].values[0]
 
 # ----------------------------
 # Performance Logic
@@ -181,8 +187,43 @@ def get_performance(game, gpu_score, cpu_score):
     gpu_tier = tier(gpu_score, thresholds, "gpu")
     cpu_tier = tier(cpu_score, thresholds, "cpu")
 
-    # Final performance = lowest of GPU or CPU tier
+    # Bottleneck = lowest tier
     tiers = ["Low", "Medium", "High", "Ultra"]
     final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers.index(t))
 
     return final_tier, gpu_tier, cpu_tier
+
+final_tier, gpu_tier, cpu_tier = get_performance(selected_game, gpu_score, cpu_score)
+
+# ----------------------------
+# Display Results
+# ----------------------------
+st.subheader("🔎 Benchmark Scores")
+st.write(f"**CPU**: {selected_cpu} → Score: {cpu_score}")
+st.write(f"**GPU**: {selected_gpu} → Score: {gpu_score}")
+
+st.subheader("🖥️ Component Tiers vs Game Requirements")
+st.write(f"CPU Tier: **{cpu_tier}**")
+st.write(f"GPU Tier: **{gpu_tier}**")
+
+st.subheader("🎨 Expected Graphics Quality")
+st.success(f"Final predicted tier for **{selected_game}**: **{final_tier}**")
+
+# ----------------------------
+# Visualization: Your parts vs requirements
+# ----------------------------
+thresholds = game_requirements[selected_game]
+
+chart_df = pd.DataFrame({
+    "Component": ["CPU", "CPU", "GPU", "GPU"],
+    "Type": ["Your Part", "Required (High)", "Your Part", "Required (High)"],
+    "Score": [
+        cpu_score, thresholds["high"]["cpu"],
+        gpu_score, thresholds["high"]["gpu"],
+    ]
+})
+
+fig = px.bar(chart_df, x="Component", y="Score", color="Type",
+             barmode="group", text="Score",
+             title=f"Your Hardware vs {selected_game} (High settings)")
+st.plotly_chart(fig)
