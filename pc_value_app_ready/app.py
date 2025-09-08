@@ -185,8 +185,8 @@ def get_cpu_tier(cpu_score):
 
 cpu_tier = get_cpu_tier(cpu_score)
 
-    tiers_order = ["Low", "Medium", "High", "Ultra"]
-    final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers_order.index(t))
+tiers_order = ["Low", "Medium", "High", "Ultra"]
+final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers_order.index(t))
 
     return final_tier, gpu_tier, cpu_tier, cpu_scaled
 
