@@ -170,17 +170,20 @@ def get_performance(game, gpu_score, cpu_score):
 
     thresholds = game_requirements[game]
 
-    def tier(score, reqs, part):
-        if score >= reqs[part]["ultra"]:
-            return "Ultra"
-        elif score >= reqs[part]["high"]:
-            return "High"
-        elif score >= reqs[part]["medium"]:
-            return "Medium"
-        else:
-            return "Low"
+ # ----------------------------
+# Fixed CPU tiering based on PassMark
+# ----------------------------
+def get_cpu_tier(cpu_score):
+    if cpu_score < 18000:
+        return "Low"
+    elif cpu_score < 30000:
+        return "Medium"
+    elif cpu_score < 50000:
+        return "High"
+    else:
+        return "Ultra"
 
-    cpu_tier = tier(cpu_scaled, thresholds, "cpu")
+cpu_tier = get_cpu_tier(cpu_score)
 
     tiers_order = ["Low", "Medium", "High", "Ultra"]
     final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers_order.index(t))
