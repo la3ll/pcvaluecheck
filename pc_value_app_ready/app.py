@@ -122,6 +122,7 @@ game_requirements = {
     "Valorant": {"cpu": {"low":1000,"medium":3000,"high":8000,"ultra":15000}, 
                  "gpu": {"low":15,"medium":30,"high":50,"ultra":80}},
 }
+
 # ----------------------------
 # Selections
 # ----------------------------
@@ -153,11 +154,6 @@ def get_gpu_tiers(gpu_scores):
 # Performance Logic
 # ----------------------------
 def get_performance(game, gpu_score, cpu_score):
-    # CPU scaling: 0–200
-    cpu_min = cpu_df["score"].min()
-    cpu_max = cpu_df["score"].max()
-    cpu_scaled = (cpu_score - cpu_min) / (cpu_max - cpu_min) * 200
-
     # GPU tier
     gpu_tiers_scaled = get_gpu_tiers(gpu_df["score"])
     if gpu_score >= gpu_tiers_scaled["ultra"]:
@@ -186,7 +182,7 @@ def get_performance(game, gpu_score, cpu_score):
     tiers_order = ["Low", "Medium", "High", "Ultra"]
     final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers_order.index(t))
 
-    return final_tier, gpu_tier, cpu_tier, cpu_scaled
+    return final_tier, gpu_tier, cpu_tier
 
 # ----------------------------
 # Get selected component scores
@@ -194,9 +190,7 @@ def get_performance(game, gpu_score, cpu_score):
 gpu_score = gpu_df.loc[gpu_df["name"] == selected_gpu, "score"].values[0]
 cpu_score = cpu_df.loc[cpu_df["name"] == selected_cpu, "score"].values[0]
 
-final_tier, gpu_tier, cpu_tier, cpu_scaled = get_performance(
-    selected_game, gpu_score, cpu_score
-)
+final_tier, gpu_tier, cpu_tier = get_performance(selected_game, gpu_score, cpu_score)
 
 st.subheader("Performance Summary")
 st.write(f"**GPU Tier:** {gpu_tier}")
@@ -207,10 +201,11 @@ st.write(f"**Final Performance:** {final_tier}")
 # Compatibility warning and suggestions
 # ----------------------------
 def suggest_mismatch(cpu_score, gpu_score):
-    ratio = cpu_score / gpu_score
-    if ratio > 500:  # CPU too strong for GPU
+    # scale GPU roughly to CPU PassMark range
+    ratio = cpu_score / (gpu_score * 300)
+    if ratio > 1.5:  # CPU >50% stronger than GPU
         st.warning("CPU significantly stronger than GPU. Consider a stronger GPU for balance.")
-    elif ratio < 0.2:  # GPU too strong for CPU
+    elif ratio < 0.7:  # GPU >40% stronger than CPU
         st.warning("GPU significantly stronger than CPU. Consider a stronger CPU for balance.")
     else:
         st.success("CPU and GPU are reasonably balanced.")
@@ -218,14 +213,19 @@ def suggest_mismatch(cpu_score, gpu_score):
 suggest_mismatch(cpu_score, gpu_score)
 
 # ----------------------------
-# Helper to get top/bottom + +/-10
+# Helper to get top/bottom + +/-10 around selection
 # ----------------------------
 def get_chart_subset(df, selected_name):
-    df_sorted = df.sort_values("score", ascending=True).reset_index(drop=True)  # reset index
-    sel_idx = df_sorted.index[df_sorted["name"] == selected_name][0]  # locate by position
+    df_sorted = df.sort_values("score", ascending=True).reset_index(drop=True)
+    sel_idx = df_sorted.index[df_sorted["name"] == selected_name][0]
     start_idx = max(sel_idx - 10, 0)
-    end_idx = min(sel_idx + 11, len(df_sorted))
-    indices_to_show = sorted(set([0, len(df_sorted)-1] + list(range(start_idx, end_idx))))
+    end_idx = min(sel_idx + 10, len(df_sorted) - 1)
+    indices_to_show = list(range(start_idx, end_idx + 1))
+    # always include first and last
+    if 0 not in indices_to_show:
+        indices_to_show = [0] + indices_to_show
+    if len(df_sorted) - 1 not in indices_to_show:
+        indices_to_show = indices_to_show + [len(df_sorted) - 1]
     return df_sorted.loc[indices_to_show]
 
 # --- GPU Chart ---
