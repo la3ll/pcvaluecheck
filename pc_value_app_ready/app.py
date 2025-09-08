@@ -100,7 +100,6 @@ cpu_data = [
 # ----------------------------
 # Convert to DataFrames
 # ----------------------------
-
 gpu_df = pd.DataFrame(gpu_data, columns=["name", "score", "link"])
 cpu_df = pd.DataFrame(cpu_data, columns=["name", "score", "link"])
 
