@@ -212,29 +212,29 @@ def suggest_mismatch(cpu_score, gpu_score):
 
 suggest_mismatch(cpu_score, gpu_score)
 
-# ----------------------------
-# Helper to get top/bottom + +/-10 around selection
-# ----------------------------
 def get_chart_subset(df, selected_name):
     df_sorted = df.sort_values("score", ascending=True)  # keep original index
-    sel_idx = df_sorted.index[df_sorted["name"] == selected_name][0]  # locate by original index
     
-    # find position of selected row in sorted DataFrame
-    pos = df_sorted.reset_index().index[df_sorted.reset_index()["index"] == sel_idx][0]
+    # position of the selected component in the sorted DataFrame
+    sel_pos = df_sorted.index[df_sorted["name"] == selected_name][0]
+    pos = df_sorted.reset_index().index[df_sorted.reset_index()["index"] == sel_pos][0]
     
     start_idx = max(pos - 10, 0)
     end_idx = min(pos + 10, len(df_sorted) - 1)
     
-    subset = df_sorted.iloc[start_idx:end_idx + 1]  # use iloc to slice by position
+    subset = df_sorted.iloc[start_idx:end_idx + 1]  # 10 above/below
     
-    # always include first and last rows if not in subset
+    # always include first and last rows
     if df_sorted.index[0] not in subset.index:
         subset = pd.concat([df_sorted.iloc[[0]], subset])
     if df_sorted.index[-1] not in subset.index:
         subset = pd.concat([subset, df_sorted.iloc[[-1]]])
-        
+    
+    # ensure selected component is included
+    if sel_pos not in subset.index:
+        subset = pd.concat([subset, df_sorted.loc[[sel_pos]]])
+    
     return subset
-
 # --- GPU Chart ---
 gpu_chart_df = get_chart_subset(gpu_df, selected_gpu)
 colors_gpu = ["orange" if x == selected_gpu else "lightblue" for x in gpu_chart_df["name"]]
