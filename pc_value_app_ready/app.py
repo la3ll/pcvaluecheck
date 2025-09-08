@@ -124,24 +124,14 @@ game_requirements = {
 }
 
 # ----------------------------
-# Game Selection
+# Selections
 # ----------------------------
 games = list(game_requirements.keys())
 selected_game = st.selectbox("Select Game/Benchmark:", games)
 
-# ----------------------------
-# CPU/GPU Selection
-# ----------------------------
-all_gpu_names = gpu_df["name"].tolist()
-all_cpu_names = cpu_df["name"].tolist()
+selected_gpu = st.selectbox("Select GPU:", gpu_df["name"])
+selected_cpu = st.selectbox("Select CPU:", cpu_df["name"])
 
-selected_gpu = st.selectbox("Select GPU:", all_gpu_names)
-selected_cpu = st.selectbox("Select CPU:", all_cpu_names)
-
-
-# ----------------------------
-# Get requirements for selected game
-# ----------------------------
 gpu_req = game_requirements[selected_game]["gpu"]
 cpu_req = game_requirements[selected_game]["cpu"]
 
@@ -164,7 +154,10 @@ def get_gpu_tiers(gpu_scores):
 # Performance Logic
 # ----------------------------
 def get_performance(game, gpu_score, cpu_score):
-    # GPU tier
+    cpu_min = cpu_df["score"].min()
+    cpu_max = cpu_df["score"].max()
+    cpu_scaled = (cpu_score - cpu_min) / (cpu_max - cpu_min) * 200
+
     gpu_tiers_scaled = get_gpu_tiers(gpu_df["score"])
     if gpu_score >= gpu_tiers_scaled["ultra"]:
         gpu_tier = "Ultra"
@@ -175,8 +168,8 @@ def get_performance(game, gpu_score, cpu_score):
     else:
         gpu_tier = "Low"
 
-    # CPU tier based on actual PassMark score
     thresholds = game_requirements[game]
+
     def tier(score, reqs, part):
         if score >= reqs[part]["ultra"]:
             return "Ultra"
@@ -187,19 +180,19 @@ def get_performance(game, gpu_score, cpu_score):
         else:
             return "Low"
 
-    cpu_tier = tier(cpu_score, thresholds, "cpu")
+    cpu_tier = tier(cpu_scaled, thresholds, "cpu")
 
-    # Final performance = lowest of GPU or CPU tier
     tiers_order = ["Low", "Medium", "High", "Ultra"]
     final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers_order.index(t))
 
-    return final_tier, gpu_tier, cpu_tier, cpu_score
+    return final_tier, gpu_tier, cpu_tier, cpu_scaled
 
-# Get selected component scores
 gpu_score = gpu_df.loc[gpu_df["name"] == selected_gpu, "score"].values[0]
 cpu_score = cpu_df.loc[cpu_df["name"] == selected_cpu, "score"].values[0]
 
-final_tier, gpu_tier, cpu_tier, cpu_scaled = get_performance(selected_game, gpu_score, cpu_score)
+final_tier, gpu_tier, cpu_tier, cpu_scaled = get_performance(
+    selected_game, gpu_score, cpu_score
+)
 
 st.subheader("Performance Summary")
 st.write(f"**GPU Tier:** {gpu_tier}")
@@ -207,48 +200,75 @@ st.write(f"**CPU Tier:** {cpu_tier}")
 st.write(f"**Final Performance:** {final_tier}")
 
 # ----------------------------
-# Component Match Suggestions
+# Component Match Warning & Suggestions
 # ----------------------------
-def get_suggestions(selected_score, df, part_req):
-    # Suggest components within ±20% of selected score
-    min_score = selected_score * 0.8
-    max_score = selected_score * 1.2
-    suggestions = df[(df["score"] >= min_score) & (df["score"] <= max_score)]
-    return suggestions.to_dict("records")
+def check_component_match(cpu_score, gpu_score, tolerance=0.5):
+    # Normalize scores
+    cpu_min, cpu_max = cpu_df["score"].min(), cpu_df["score"].max()
+    gpu_min, gpu_max = gpu_df["score"].min(), gpu_df["score"].max()
 
-gpu_suggestions = get_suggestions(gpu_score, gpu_df, gpu_req)
-cpu_suggestions = get_suggestions(cpu_score, cpu_df, cpu_req)
+    cpu_norm = (cpu_score - cpu_min) / (cpu_max - cpu_min)
+    gpu_norm = (gpu_score - gpu_min) / (gpu_max - gpu_min)
 
-# Show compatibility warning if tiers differ significantly
-tiers_order = ["Low", "Medium", "High", "Ultra"]
-tier_diff = abs(tiers_order.index(gpu_tier) - tiers_order.index(cpu_tier))
-if tier_diff >= 2:
-    st.warning("Selected CPU and GPU may be mismatched in performance. Consider adjusting your selection for better balance.")
+    ratio = cpu_norm / gpu_norm if gpu_norm > 0 else 0
 
-# ----------------------------
-# GPU Chart with Suggestions
-# ----------------------------
-gpu_sorted = gpu_df.sort_values("score", ascending=True)
-gpu_colors = []
-gpu_suggestion_names = [g['name'] for g in gpu_suggestions]
+    warning = None
+    suggestions = {}
 
-for name in gpu_sorted["name"]:
-    if name == selected_gpu:
-        gpu_colors.append("orange")
-    elif name in gpu_suggestion_names:
-        gpu_colors.append("green")
+    if ratio > 1 + tolerance:
+        warning = "CPU is much stronger than GPU – consider upgrading your GPU."
+        suggestions["gpu"] = gpu_df.iloc[(gpu_df["score"]-cpu_score).abs().argsort()[:3]]["name"].tolist()
+    elif ratio < 1 - tolerance:
+        warning = "GPU is much stronger than CPU – consider upgrading your CPU."
+        suggestions["cpu"] = cpu_df.iloc[(cpu_df["score"]-gpu_score).abs().argsort()[:3]]["name"].tolist()
     else:
-        gpu_colors.append("lightblue")
+        warning = "CPU and GPU are reasonably balanced."
+    
+    return warning, suggestions
+
+warning, suggestions = check_component_match(cpu_score, gpu_score)
+
+st.subheader("Compatibility Check")
+st.write(warning)
+if suggestions:
+    if "gpu" in suggestions:
+        st.write("Suggested GPUs to better match your CPU:", suggestions["gpu"])
+    if "cpu" in suggestions:
+        st.write("Suggested CPUs to better match your GPU:", suggestions["cpu"])
+
+# ----------------------------
+# Chart data subset function
+# ----------------------------
+def get_chart_data(df, selected_name, context=10):
+    df_sorted = df.sort_values("score", ascending=True).reset_index(drop=True)
+    idx_selected = df_sorted.index[df_sorted["name"] == selected_name][0]
+
+    start = max(idx_selected - context, 0)
+    end = min(idx_selected + context + 1, len(df_sorted))
+
+    df_chart = pd.concat([
+        df_sorted.iloc[[0]],  # lowest
+        df_sorted.iloc[start:end],  # selected ± context
+        df_sorted.iloc[[-1]]  # highest
+    ]).drop_duplicates().reset_index(drop=True)
+
+    return df_chart
+
+# ----------------------------
+# GPU Chart
+# ----------------------------
+gpu_chart_df = get_chart_data(gpu_df, selected_gpu)
+colors_gpu = ["orange" if x == selected_gpu else "lightblue" for x in gpu_chart_df["name"]]
 
 fig_gpu = px.bar(
-    gpu_sorted,
+    gpu_chart_df,
     x="score",
     y="name",
     orientation="h",
     title="GPU Benchmark Scores",
-    color=gpu_colors,
+    color=colors_gpu,
     color_discrete_map="identity",
-    category_orders={"name": gpu_sorted["name"].tolist()}
+    category_orders={"name": gpu_chart_df["name"].tolist()}
 )
 
 for tier, score in gpu_req.items():
@@ -263,29 +283,20 @@ for tier, score in gpu_req.items():
 st.plotly_chart(fig_gpu, use_container_width=True)
 
 # ----------------------------
-# CPU Chart with Suggestions
+# CPU Chart
 # ----------------------------
-cpu_sorted = cpu_df.sort_values("score", ascending=True)
-cpu_colors = []
-cpu_suggestion_names = [c['name'] for c in cpu_suggestions]
-
-for name in cpu_sorted["name"]:
-    if name == selected_cpu:
-        cpu_colors.append("orange")
-    elif name in cpu_suggestion_names:
-        cpu_colors.append("green")
-    else:
-        cpu_colors.append("lightblue")
+cpu_chart_df = get_chart_data(cpu_df, selected_cpu)
+colors_cpu = ["orange" if x == selected_cpu else "lightblue" for x in cpu_chart_df["name"]]
 
 fig_cpu = px.bar(
-    cpu_sorted,
+    cpu_chart_df,
     x="score",
     y="name",
     orientation="h",
     title="CPU Benchmark Scores",
-    color=cpu_colors,
+    color=colors_cpu,
     color_discrete_map="identity",
-    category_orders={"name": cpu_sorted["name"].tolist()}
+    category_orders={"name": cpu_chart_df["name"].tolist()}
 )
 
 for tier, score in cpu_req.items():
