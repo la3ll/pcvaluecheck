@@ -212,6 +212,9 @@ def suggest_mismatch(cpu_score, gpu_score):
 
 suggest_mismatch(cpu_score, gpu_score)
 
+# ----------------------------
+# Helper to get top/bottom + +/-10 and include selected component
+# ----------------------------
 def get_chart_subset(df, selected_name):
     df_sorted = df.sort_values("score", ascending=True)  # keep original index
     
@@ -235,6 +238,7 @@ def get_chart_subset(df, selected_name):
         subset = pd.concat([subset, df_sorted.loc[[sel_pos]]])
     
     return subset
+
 # --- GPU Chart ---
 gpu_chart_df = get_chart_subset(gpu_df, selected_gpu)
 colors_gpu = ["orange" if x == selected_gpu else "lightblue" for x in gpu_chart_df["name"]]
