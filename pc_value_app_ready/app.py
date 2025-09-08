@@ -209,42 +209,57 @@ st.write(f"**GPU Tier:** {gpu_tier}")
 st.write(f"**CPU Tier:** {cpu_tier}")
 st.write(f"**Final Performance:** {final_tier}")
 
-# ----------------------------
-# GPU Chart
-# ----------------------------
-gpu_sorted = gpu_df.sort_values("score", ascending=True)
+# --- GPU Chart ---
+gpu_sorted = gpu_df.sort_values("score", ascending=True)  # lowest → highest
+colors_gpu = ["orange" if x == selected_gpu else "lightblue" for x in gpu_sorted["name"]]
+
 fig_gpu = px.bar(
     gpu_sorted,
     x="score",
     y="name",
     orientation="h",
-    text="score",
-    labels={"score": "GPU Score", "name": "GPU"},
-    title="GPU Benchmark Comparison"
+    title="GPU Benchmark Scores",
+    color=colors_gpu,
+    color_discrete_map="identity",
+    category_orders={"name": gpu_sorted["name"].tolist()}  # keep this order
 )
-fig_gpu.update_traces(
-    marker_color=["orange" if x==selected_gpu else "lightblue" for x in gpu_sorted["name"]],
-    marker_line_color=["black" if x==selected_gpu else None for x in gpu_sorted["name"]],
-    marker_line_width=[2 if x==selected_gpu else 0 for x in gpu_sorted["name"]],
-)
+
+# Add requirement lines
+for tier, score in gpu_req.items():
+    fig_gpu.add_vline(
+        x=score,
+        line_dash="dash",
+        line_color="red",
+        annotation_text=tier,
+        annotation_position="top right"
+    )
+
 st.plotly_chart(fig_gpu, use_container_width=True)
 
-# ----------------------------
-# CPU Chart
-# ----------------------------
-cpu_sorted = cpu_df.sort_values("score", ascending=True)
+
+# --- CPU Chart ---
+cpu_sorted = cpu_df.sort_values("score", ascending=True)  # lowest → highest
+colors_cpu = ["orange" if x == selected_cpu else "lightblue" for x in cpu_sorted["name"]]
+
 fig_cpu = px.bar(
     cpu_sorted,
     x="score",
     y="name",
     orientation="h",
-    text="score",
-    labels={"score": "CPU Score", "name": "CPU"},
-    title="CPU Benchmark Comparison"
+    title="CPU Benchmark Scores",
+    color=colors_cpu,
+    color_discrete_map="identity",
+    category_orders={"name": cpu_sorted["name"].tolist()}  # keep this order
 )
-fig_cpu.update_traces(
-    marker_color=["orange" if x==selected_cpu else "lightblue" for x in cpu_sorted["name"]],
-    marker_line_color=["black" if x==selected_cpu else None for x in cpu_sorted["name"]],
-    marker_line_width=[2 if x==selected_cpu else 0 for x in cpu_sorted["name"]],
-)
+
+# Add requirement lines
+for tier, score in cpu_req.items():
+    fig_cpu.add_vline(
+        x=score,
+        line_dash="dash",
+        line_color="red",
+        annotation_text=tier,
+        annotation_position="top right"
+    )
+
 st.plotly_chart(fig_cpu, use_container_width=True)
