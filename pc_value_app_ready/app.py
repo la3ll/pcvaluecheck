@@ -154,10 +154,12 @@ def get_gpu_tiers(gpu_scores):
 # Performance Logic
 # ----------------------------
 def get_performance(game, gpu_score, cpu_score):
+    # CPU scaling: 0–200
     cpu_min = cpu_df["score"].min()
     cpu_max = cpu_df["score"].max()
     cpu_scaled = (cpu_score - cpu_min) / (cpu_max - cpu_min) * 200
 
+    # GPU tier
     gpu_tiers_scaled = get_gpu_tiers(gpu_df["score"])
     if gpu_score >= gpu_tiers_scaled["ultra"]:
         gpu_tier = "Ultra"
@@ -168,27 +170,23 @@ def get_performance(game, gpu_score, cpu_score):
     else:
         gpu_tier = "Low"
 
-    thresholds = game_requirements[game]
-
- # ----------------------------
-# Fixed CPU tiering based on PassMark
-# ----------------------------
-def get_cpu_tier(cpu_score):
+    # ----------------------------
+    # Fixed CPU tiering based on PassMark
+    # ----------------------------
     if cpu_score < 18000:
-        return "Low"
+        cpu_tier = "Low"
     elif cpu_score < 30000:
-        return "Medium"
+        cpu_tier = "Medium"
     elif cpu_score < 50000:
-        return "High"
+        cpu_tier = "High"
     else:
-        return "Ultra"
+        cpu_tier = "Ultra"
 
-cpu_tier = get_cpu_tier(cpu_score)
+    # Final performance = lowest of GPU or CPU tier
+    tiers_order = ["Low", "Medium", "High", "Ultra"]
+    final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers_order.index(t))
 
-tiers_order = ["Low", "Medium", "High", "Ultra"]
-final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers_order.index(t))
-
-return final_tier, gpu_tier, cpu_tier, cpu_scaled
+    return final_tier, gpu_tier, cpu_tier, cpu_scaled
 
 gpu_score = gpu_df.loc[gpu_df["name"] == selected_gpu, "score"].values[0]
 cpu_score = cpu_df.loc[cpu_df["name"] == selected_cpu, "score"].values[0]
