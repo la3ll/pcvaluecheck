@@ -122,7 +122,6 @@ game_requirements = {
     "Valorant": {"cpu": {"low":1000,"medium":3000,"high":8000,"ultra":15000}, 
                  "gpu": {"low":15,"medium":30,"high":50,"ultra":80}},
 }
-
 # ----------------------------
 # Selections
 # ----------------------------
@@ -170,17 +169,18 @@ def get_performance(game, gpu_score, cpu_score):
     else:
         gpu_tier = "Low"
 
-    # ----------------------------
-    # Fixed CPU tiering based on PassMark
-    # ----------------------------
-    if cpu_score < 18000:
-        cpu_tier = "Low"
-    elif cpu_score < 30000:
-        cpu_tier = "Medium"
-    elif cpu_score < 50000:
-        cpu_tier = "High"
-    else:
-        cpu_tier = "Ultra"
+    # CPU tier based on PassMark thresholds
+    def tier_cpu(score):
+        if score < 18000:   # under 18k is Low
+            return "Low"
+        elif score < cpu_req["high"]:
+            return "Medium"
+        elif score < cpu_req["ultra"]:
+            return "High"
+        else:
+            return "Ultra"
+
+    cpu_tier = tier_cpu(cpu_score)
 
     # Final performance = lowest of GPU or CPU tier
     tiers_order = ["Low", "Medium", "High", "Ultra"]
@@ -188,6 +188,9 @@ def get_performance(game, gpu_score, cpu_score):
 
     return final_tier, gpu_tier, cpu_tier, cpu_scaled
 
+# ----------------------------
+# Get selected component scores
+# ----------------------------
 gpu_score = gpu_df.loc[gpu_df["name"] == selected_gpu, "score"].values[0]
 cpu_score = cpu_df.loc[cpu_df["name"] == selected_cpu, "score"].values[0]
 
@@ -201,64 +204,32 @@ st.write(f"**CPU Tier:** {cpu_tier}")
 st.write(f"**Final Performance:** {final_tier}")
 
 # ----------------------------
-# Component Match Warning & Suggestions
+# Compatibility warning and suggestions
 # ----------------------------
-def check_component_match(cpu_score, gpu_score, tolerance=0.5):
-    # Normalize scores
-    cpu_min, cpu_max = cpu_df["score"].min(), cpu_df["score"].max()
-    gpu_min, gpu_max = gpu_df["score"].min(), gpu_df["score"].max()
-
-    cpu_norm = (cpu_score - cpu_min) / (cpu_max - cpu_min)
-    gpu_norm = (gpu_score - gpu_min) / (gpu_max - gpu_min)
-
-    ratio = cpu_norm / gpu_norm if gpu_norm > 0 else 0
-
-    warning = None
-    suggestions = {}
-
-    if ratio > 1 + tolerance:
-        warning = "CPU is much stronger than GPU – consider upgrading your GPU."
-        suggestions["gpu"] = gpu_df.iloc[(gpu_df["score"]-cpu_score).abs().argsort()[:3]]["name"].tolist()
-    elif ratio < 1 - tolerance:
-        warning = "GPU is much stronger than CPU – consider upgrading your CPU."
-        suggestions["cpu"] = cpu_df.iloc[(cpu_df["score"]-gpu_score).abs().argsort()[:3]]["name"].tolist()
+def suggest_mismatch(cpu_score, gpu_score):
+    ratio = cpu_score / gpu_score
+    if ratio > 500:  # CPU too strong for GPU
+        st.warning("CPU significantly stronger than GPU. Consider a stronger GPU for balance.")
+    elif ratio < 0.2:  # GPU too strong for CPU
+        st.warning("GPU significantly stronger than CPU. Consider a stronger CPU for balance.")
     else:
-        warning = "CPU and GPU are reasonably balanced."
-    
-    return warning, suggestions
+        st.success("CPU and GPU are reasonably balanced.")
 
-warning, suggestions = check_component_match(cpu_score, gpu_score)
-
-st.subheader("Compatibility Check")
-st.write(warning)
-if suggestions:
-    if "gpu" in suggestions:
-        st.write("Suggested GPUs to better match your CPU:", suggestions["gpu"])
-    if "cpu" in suggestions:
-        st.write("Suggested CPUs to better match your GPU:", suggestions["cpu"])
+suggest_mismatch(cpu_score, gpu_score)
 
 # ----------------------------
-# Chart data subset function
+# Helper to get top/bottom + +/-10
 # ----------------------------
-def get_chart_data(df, selected_name, context=10):
-    df_sorted = df.sort_values("score", ascending=True).reset_index(drop=True)
-    idx_selected = df_sorted.index[df_sorted["name"] == selected_name][0]
+def get_chart_subset(df, selected_name):
+    df_sorted = df.sort_values("score", ascending=True)
+    sel_idx = df_sorted.index.get_loc(df[df["name"] == selected_name].index[0])
+    start_idx = max(sel_idx - 10, 0)
+    end_idx = min(sel_idx + 11, len(df_sorted))
+    indices_to_show = sorted(set([0, len(df_sorted)-1] + list(range(start_idx, end_idx))))
+    return df_sorted.loc[indices_to_show]
 
-    start = max(idx_selected - context, 0)
-    end = min(idx_selected + context + 1, len(df_sorted))
-
-    df_chart = pd.concat([
-        df_sorted.iloc[[0]],  # lowest
-        df_sorted.iloc[start:end],  # selected ± context
-        df_sorted.iloc[[-1]]  # highest
-    ]).drop_duplicates().reset_index(drop=True)
-
-    return df_chart
-
-# ----------------------------
-# GPU Chart
-# ----------------------------
-gpu_chart_df = get_chart_data(gpu_df, selected_gpu)
+# --- GPU Chart ---
+gpu_chart_df = get_chart_subset(gpu_df, selected_gpu)
 colors_gpu = ["orange" if x == selected_gpu else "lightblue" for x in gpu_chart_df["name"]]
 
 fig_gpu = px.bar(
@@ -273,20 +244,12 @@ fig_gpu = px.bar(
 )
 
 for tier, score in gpu_req.items():
-    fig_gpu.add_vline(
-        x=score,
-        line_dash="dash",
-        line_color="red",
-        annotation_text=tier,
-        annotation_position="top right"
-    )
+    fig_gpu.add_vline(x=score, line_dash="dash", line_color="red", annotation_text=tier, annotation_position="top right")
 
 st.plotly_chart(fig_gpu, use_container_width=True)
 
-# ----------------------------
-# CPU Chart
-# ----------------------------
-cpu_chart_df = get_chart_data(cpu_df, selected_cpu)
+# --- CPU Chart ---
+cpu_chart_df = get_chart_subset(cpu_df, selected_cpu)
 colors_cpu = ["orange" if x == selected_cpu else "lightblue" for x in cpu_chart_df["name"]]
 
 fig_cpu = px.bar(
@@ -301,12 +264,6 @@ fig_cpu = px.bar(
 )
 
 for tier, score in cpu_req.items():
-    fig_cpu.add_vline(
-        x=score,
-        line_dash="dash",
-        line_color="red",
-        annotation_text=tier,
-        annotation_position="top right"
-    )
+    fig_cpu.add_vline(x=score, line_dash="dash", line_color="red", annotation_text=tier, annotation_position="top right")
 
 st.plotly_chart(fig_cpu, use_container_width=True)
