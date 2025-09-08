@@ -132,8 +132,12 @@ selected_game = st.selectbox("Select Game/Benchmark:", games)
 # ----------------------------
 # CPU/GPU Selection
 # ----------------------------
-selected_gpu = st.selectbox("Select GPU:", gpu_df["name"])
-selected_cpu = st.selectbox("Select CPU:", cpu_df["name"])
+all_gpu_names = gpu_df["name"].tolist()
+all_cpu_names = cpu_df["name"].tolist()
+
+selected_gpu = st.selectbox("Select GPU:", all_gpu_names)
+selected_cpu = st.selectbox("Select CPU:", all_cpu_names)
+
 
 # ----------------------------
 # Get requirements for selected game
