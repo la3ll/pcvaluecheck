@@ -160,11 +160,6 @@ def get_gpu_tiers(gpu_scores):
 # Performance Logic
 # ----------------------------
 def get_performance(game, gpu_score, cpu_score):
-    # CPU scaling 0-200
-    cpu_min = cpu_df["score"].min()
-    cpu_max = cpu_df["score"].max()
-    cpu_scaled = (cpu_score - cpu_min) / (cpu_max - cpu_min) * 200
-
     # GPU tier
     gpu_tiers_scaled = get_gpu_tiers(gpu_df["score"])
     if gpu_score >= gpu_tiers_scaled["ultra"]:
@@ -176,7 +171,7 @@ def get_performance(game, gpu_score, cpu_score):
     else:
         gpu_tier = "Low"
 
-    # CPU tier
+    # CPU tier based on actual PassMark score
     thresholds = game_requirements[game]
     def tier(score, reqs, part):
         if score >= reqs[part]["ultra"]:
@@ -188,12 +183,13 @@ def get_performance(game, gpu_score, cpu_score):
         else:
             return "Low"
 
-    cpu_tier = tier(cpu_scaled, thresholds, "cpu")
+    cpu_tier = tier(cpu_score, thresholds, "cpu")
 
-    # Final performance = lowest tier
+    # Final performance = lowest of GPU or CPU tier
     tiers_order = ["Low", "Medium", "High", "Ultra"]
     final_tier = min(gpu_tier, cpu_tier, key=lambda t: tiers_order.index(t))
-    return final_tier, gpu_tier, cpu_tier, cpu_scaled
+
+    return final_tier, gpu_tier, cpu_tier, cpu_score
 
 # Get selected component scores
 gpu_score = gpu_df.loc[gpu_df["name"] == selected_gpu, "score"].values[0]
