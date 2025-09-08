@@ -216,17 +216,24 @@ suggest_mismatch(cpu_score, gpu_score)
 # Helper to get top/bottom + +/-10 around selection
 # ----------------------------
 def get_chart_subset(df, selected_name):
-    df_sorted = df.sort_values("score", ascending=True).reset_index(drop=True)
-    sel_idx = df_sorted.index[df_sorted["name"] == selected_name][0]
-    start_idx = max(sel_idx - 10, 0)
-    end_idx = min(sel_idx + 10, len(df_sorted) - 1)
-    indices_to_show = list(range(start_idx, end_idx + 1))
-    # always include first and last
-    if 0 not in indices_to_show:
-        indices_to_show = [0] + indices_to_show
-    if len(df_sorted) - 1 not in indices_to_show:
-        indices_to_show = indices_to_show + [len(df_sorted) - 1]
-    return df_sorted.loc[indices_to_show]
+    df_sorted = df.sort_values("score", ascending=True)  # keep original index
+    sel_idx = df_sorted.index[df_sorted["name"] == selected_name][0]  # locate by original index
+    
+    # find position of selected row in sorted DataFrame
+    pos = df_sorted.reset_index().index[df_sorted.reset_index()["index"] == sel_idx][0]
+    
+    start_idx = max(pos - 10, 0)
+    end_idx = min(pos + 10, len(df_sorted) - 1)
+    
+    subset = df_sorted.iloc[start_idx:end_idx + 1]  # use iloc to slice by position
+    
+    # always include first and last rows if not in subset
+    if df_sorted.index[0] not in subset.index:
+        subset = pd.concat([df_sorted.iloc[[0]], subset])
+    if df_sorted.index[-1] not in subset.index:
+        subset = pd.concat([subset, df_sorted.iloc[[-1]]])
+        
+    return subset
 
 # --- GPU Chart ---
 gpu_chart_df = get_chart_subset(gpu_df, selected_gpu)
