@@ -221,8 +221,8 @@ suggest_mismatch(cpu_score, gpu_score)
 # Helper to get top/bottom + +/-10
 # ----------------------------
 def get_chart_subset(df, selected_name):
-    df_sorted = df.sort_values("score", ascending=True)
-    sel_idx = df_sorted.index.get_loc(df[df["name"] == selected_name].index[0])
+    df_sorted = df.sort_values("score", ascending=True).reset_index(drop=True)  # reset index
+    sel_idx = df_sorted.index[df_sorted["name"] == selected_name][0]  # locate by position
     start_idx = max(sel_idx - 10, 0)
     end_idx = min(sel_idx + 11, len(df_sorted))
     indices_to_show = sorted(set([0, len(df_sorted)-1] + list(range(start_idx, end_idx))))
