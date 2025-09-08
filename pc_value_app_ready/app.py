@@ -137,6 +137,11 @@ selected_game = st.selectbox("Select Game/Benchmark:", games)
 # ----------------------------
 selected_gpu = st.selectbox("Select GPU:", gpu_df["name"])
 selected_cpu = st.selectbox("Select CPU:", cpu_df["name"])
+# ----------------------------
+# Get requirements for selected game
+# ----------------------------
+gpu_req = game_requirements[selected_game]["gpu"]
+cpu_req = game_requirements[selected_game]["cpu"]
 
 # ----------------------------
 # Dynamic GPU Tiering
